@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+.npm
+
+# Next.js
+.next/
+out/
+build/
+
+# Environment variables (NEVER push these)
+.env
+.env.local
+.env.production
+.env*.local
+
+# Node.js binaries (prevent this from happening again)
+node-v*/
+
+# Firebase
+.firebase/
+firebase-debug.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+#md files
+
+
+CLAUDE.md
+AGENTS.md
+STATUS.md
