@@ -2,7 +2,7 @@
 
 import React from "react";
 import { AlertCircle, X } from "lucide-react";
-import type { Appointment } from "@/lib/firestore-schema";
+import type { Appointment } from "../lib/firestore-schema";
 
 interface CancellationDialogProps {
   appointment: Appointment | null;

@@ -8,17 +8,17 @@ import {
   onSnapshot,
   Timestamp,
 } from "firebase/firestore";
-import { db, auth } from "@/lib/firebase";
-import type { Appointment } from "@/lib/firestore-schema";
+import { db, auth } from "../lib/firebase";
+import type { Appointment } from "../lib/firestore-schema";
 import {
   canCancelAppointment,
   CANCELLATION_ELIGIBLE_STATUSES,
-} from "@/lib/firestore-schema";
-import { cancelAppointment } from "@/lib/cancellation-service";
-import { toast } from "@/lib/toast";
-import { formatDate, formatTime } from "@/lib/date-utils";
+} from "../lib/firestore-schema";
+import { cancelAppointment } from "../lib/cancellation-service";
+import { toast } from "../lib/toast";
+import { formatDate, formatTime } from "../lib/date-utils";
 import { Calendar, Clock, User, AlertCircle, Loader } from "lucide-react";
-import CancellationDialog from "@/components/CancellationDialog";
+import CancellationDialog from "./CancellationDialog";
 
 interface AppointmentWithFormatted extends Appointment {
   formattedDate: string;

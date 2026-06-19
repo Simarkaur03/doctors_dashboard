@@ -4,8 +4,8 @@
  */
 
 import { httpsCallable } from "firebase/functions";
-import { functions } from "@/lib/firebase";
-import type { Appointment } from "@/lib/firestore-schema";
+import { functions } from "./firebase";
+import type { Appointment } from "./firestore-schema";
 
 export interface CancellationPayload {
   appointmentId: string;

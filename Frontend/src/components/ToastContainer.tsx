@@ -5,7 +5,7 @@ import {
   subscribeToToasts,
   removeToast,
   type Toast,
-} from "@/lib/toast";
+} from "../lib/toast";
 import { CheckCircle, AlertCircle, Info, AlertTriangle, X } from "lucide-react";
 
 const toastIcons = {

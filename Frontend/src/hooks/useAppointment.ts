@@ -6,9 +6,9 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import type { Appointment } from "@/lib/firestore-schema";
-import { cancelAppointment } from "@/lib/cancellation-service";
-import { toast } from "@/lib/toast";
+import type { Appointment } from "../lib/firestore-schema";
+import { cancelAppointment } from "../lib/cancellation-service";
+import { toast } from "../lib/toast";
 
 export interface UseAppointmentResult {
   cancelling: string | null;
