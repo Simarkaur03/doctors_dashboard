@@ -1,19 +1,162 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Users collection: only owners or admins may read/write
-    match /users/{userId} {
-      allow create: if request.auth != null && request.auth.uid == userId;
-
-      allow read, update, delete: if request.auth != null && (
-        request.auth.uid == userId ||
-        // allow admins to read/update/delete other user docs
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
-      );
+    function isSignedIn() {
+      return request.auth != null;
     }
 
-    // Deny all other access by default
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function uid() {
+      return request.auth.uid;
+    }
+
+    function userRole() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : 'patient';
+    }
+
+    function role() {
+      return request.auth.token.role != null ? request.auth.token.role : userRole();
+    }
+
+    function isDoctor() {
+      return role() in ['doctor', 'admin'];
+    }
+
+    function isPatient() {
+      return role() == 'patient';
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && uid() == userId;
+    }
+
+    function isImmutableRoleChange() {
+      return request.resource.data.role == resource.data.role;
+    }
+
+    function isImmutableOwnerChange() {
+      return request.resource.data.ownerId == resource.data.ownerId;
+    }
+
+    match /users/{userId} {
+      allow read: if isVerified() && (isOwner(userId) || isDoctor());
+      allow create: if isVerified() && isOwner(userId)
+        && request.resource.data.keys().hasAll(['email', 'role'])
+        && request.resource.data.uid == userId
+        && request.resource.data.role == 'patient';
+      allow update: if isVerified() && isOwner(userId)
+        && request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    match /profiles/{profileId} {
+      allow read: if isVerified() && (isOwner(profileId) || isDoctor());
+      allow create: if isVerified() && isOwner(profileId)
+        && request.resource.data.keys().hasAll(['ownerId', 'role'])
+        && request.resource.data.ownerId == profileId
+        && request.resource.data.role == role();
+      allow update: if isVerified() && isOwner(profileId)
+        && isImmutableRoleChange()
+        && isImmutableOwnerChange();
+      allow delete: if false;
+    }
+
+    match /patients/{patientId} {
+      allow read: if isVerified() && (isOwner(patientId) || isDoctor());
+      allow create: if isVerified() && isOwner(patientId)
+        && request.resource.data.keys().hasAll(['ownerId', 'role'])
+        && request.resource.data.ownerId == patientId
+        && request.resource.data.role == 'patient';
+      allow update: if isVerified() && isOwner(patientId)
+        && isImmutableRoleChange()
+        && isImmutableOwnerChange();
+      allow delete: if false;
+    }
+
+    match /appointments/{appointmentId} {
+      allow read: if isVerified() && (
+        (resource.data.patientId != null && isOwner(resource.data.patientId)) ||
+        (resource.data.uid != null && isOwner(resource.data.uid)) ||
+        isDoctor() ||
+        (resource.data.doctorId != null && isOwner(resource.data.doctorId))
+      );
+      allow create: if isVerified() && isPatient()
+        && request.resource.data.keys().hasAll(['status'])
+        && (
+          request.resource.data.patientId == uid() ||
+          request.resource.data.uid == uid()
+        )
+        && request.resource.data.status in ['pending', 'booked', 'confirmed'];
+      allow update: if isVerified() && (
+        (isPatient() && (
+          (resource.data.patientId != null && isOwner(resource.data.patientId)) ||
+          (resource.data.uid != null && isOwner(resource.data.uid))
+        ) && (
+          request.resource.data.patientId == resource.data.patientId ||
+          request.resource.data.uid == resource.data.uid
+        )) ||
+        (isDoctor() && resource.data.doctorId != null && isOwner(resource.data.doctorId))
+      );
+      allow delete: if false;
+    }
+
+    match /availability/{slotId} {
+      allow read: if isVerified();
+      allow create, update: if isVerified() && isDoctor()
+        && request.resource.data.keys().hasAll(['doctorId', 'date', 'time'])
+        && request.resource.data.doctorId == uid();
+      allow delete: if isVerified() && isDoctor() && resource.data.doctorId == uid();
+    }
+
+    match /slots/{slotId} {
+      allow read: if isVerified();
+      allow create, update: if isVerified() && isDoctor()
+        && request.resource.data.keys().hasAll(['doctorId', 'date', 'time'])
+        && request.resource.data.doctorId == uid();
+      allow delete: if isVerified() && isDoctor() && resource.data.doctorId == uid();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isVerified() && (
+        (resource.data.userId != null && isOwner(resource.data.userId)) ||
+        (resource.data.uid != null && isOwner(resource.data.uid)) ||
+        isDoctor()
+      );
+      allow create, update: if isVerified() && isDoctor();
+      allow delete: if false;
+    }
+
+    match /doctorNotes/{noteId} {
+      allow read, write: if isVerified() && isDoctor();
+    }
+
+    match /healthReports/{reportId} {
+      allow read: if isVerified() && (isOwner(resource.data.patientId) || isDoctor());
+      allow create: if isVerified() && (
+        isOwner(request.resource.data.patientId) || isDoctor()
+      );
+      allow update: if isVerified() && (isOwner(resource.data.patientId) || isDoctor());
+      allow delete: if false;
+    }
+
+    match /auditLogs/{logId} {
+      allow read, write: if false;
+    }
+
+    match /calendarSettings/{settingId} {
+      allow read: if isVerified() && isDoctor() && resource.data.doctorId == uid();
+      allow create, update: if isVerified() && isDoctor()
+        && request.resource.data.keys().hasAll(['doctorId'])
+        && request.resource.data.doctorId == uid();
+      allow delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

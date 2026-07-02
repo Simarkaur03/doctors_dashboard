@@ -49,13 +49,11 @@ export async function cancelAppointment(
       appointmentId: result.data.appointmentId,
       slotId: result.data.slotId,
     };
-  } catch (error: any) {
-    console.error("Cancellation error:", error);
-
-    // Handle specific Firebase error cases
-    const message = error?.code === "functions/not-found"
+  } catch (error: unknown) {
+    const err = error as { code?: string; message?: string };
+    const message = err?.code === "functions/not-found"
       ? "Cancellation service is not available. Please try again later."
-      : error?.message || "Unable to cancel appointment. Please try again.";
+      : err?.message || "Unable to cancel appointment. Please try again.";
 
     throw new Error(message);
   }
@@ -73,8 +71,7 @@ export async function verifyAppointmentStatus(appointmentId: string): Promise<bo
 
     const result = await verifyStatusFn({ appointmentId });
     return result.data.canBeCancelled;
-  } catch (error) {
-    console.error("Verification error:", error);
+  } catch {
     return false;
   }
 }

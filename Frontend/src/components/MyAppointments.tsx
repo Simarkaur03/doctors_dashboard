@@ -6,17 +6,13 @@ import {
   query,
   where,
   onSnapshot,
-  Timestamp,
 } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
 import type { Appointment } from "../lib/firestore-schema";
-import {
-  canCancelAppointment,
-  CANCELLATION_ELIGIBLE_STATUSES,
-} from "../lib/firestore-schema";
+import { canCancelAppointment } from "../lib/firestore-schema";
 import { cancelAppointment } from "../lib/cancellation-service";
 import { toast } from "../lib/toast";
-import { formatDate, formatTime } from "../lib/date-utils";
+import { formatDate } from "../lib/date-utils";
 import { Calendar, Clock, User, AlertCircle, Loader } from "lucide-react";
 import CancellationDialog from "./CancellationDialog";
 
@@ -37,15 +33,9 @@ export default function MyAppointments() {
 
   const currentUser = auth.currentUser;
 
-  // Subscribe to real-time appointment updates
   useEffect(() => {
-    if (!currentUser) {
-      setError("You must be logged in to view your appointments");
-      setLoading(false);
-      return;
-    }
+    if (!currentUser) return;
 
-    setLoading(true);
     const appointmentsQuery = query(
       collection(db, "appointments"),
       where("patientId", "==", currentUser.uid)
@@ -77,8 +67,7 @@ export default function MyAppointments() {
         setAppointments(appointmentsList);
         setLoading(false);
       },
-      (error) => {
-        console.error("Error fetching appointments:", error);
+      () => {
         setError("Failed to load appointments. Please try again.");
         setLoading(false);
       }
@@ -111,10 +100,9 @@ export default function MyAppointments() {
       } else {
         toast.error(result.message || "Unable to cancel appointment. Please try again.");
       }
-    } catch (err: any) {
-      console.error("Cancellation failed:", err);
+    } catch (err: unknown) {
       toast.error(
-        err.message || "Unable to cancel appointment. Please try again."
+        (err instanceof Error ? err.message : null) || "Unable to cancel appointment. Please try again."
       );
     } finally {
       setCancellingId(null);

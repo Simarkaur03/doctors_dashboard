@@ -1,4 +1,3 @@
-// Public landing page (no auth). Serves as the app entry at `/`.
 import Link from "next/link";
 
 export const metadata = {
@@ -7,40 +6,25 @@ export const metadata = {
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-sage-light flex items-center justify-center">
-      <section className="mx-6 w-full max-w-md bg-white rounded-2xl p-8 shadow-md border border-gray-200">
-        <header className="flex flex-col items-center text-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-sage text-white" aria-hidden>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                <path d="M12 2v20M2 12h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-semibold text-sage">MediCare Clinic</h1>
+    <main className="flex min-h-screen items-center justify-center bg-[#FFF3D5] px-4 py-16">
+      <section className="w-full max-w-2xl rounded-[32px] bg-white p-8 shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)] sm:p-10">
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">MediCare Clinic</p>
+            <h1 className="mt-3 text-3xl font-semibold text-slate-900 sm:text-4xl">Modern care, simplified scheduling</h1>
+            <p className="mt-3 max-w-xl text-sm text-slate-600 sm:text-base">Secure appointments, clear updates, and a calming experience for every patient and clinician.</p>
           </div>
-
-          <p className="text-base text-[#6B7280]">Compassionate care. Simple scheduling.</p>
-        </header>
-
-        <div className="mt-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900">Book Your Appointment</h2>
+          <div className="rounded-2xl bg-[#FFF3D5] px-4 py-3 text-sm font-semibold text-[#4D694E]">WCAG-ready experience</div>
         </div>
 
-        <div className="mt-6 space-y-3">
-          <Link
-            href="/patient/login"
-            className="inline-flex w-full items-center justify-center rounded-lg bg-sage px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-sage-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sage-dark"
-            aria-label="Patient login — proceed to patient sign in"
-          >
-            Patient Login
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <Link href="/patient/login" className="rounded-[24px] border border-slate-200 p-5 transition hover:border-[#4D694E] hover:shadow-sm">
+            <h2 className="text-lg font-semibold text-slate-900">Patient portal</h2>
+            <p className="mt-2 text-sm text-slate-600">Manage appointments, reports, and care updates with confidence.</p>
           </Link>
-
-          <Link
-            href="/admin/login"
-            className="inline-flex w-full items-center justify-center rounded-lg bg-white px-4 py-3 text-base font-medium text-sage border border-sage shadow-sm hover:bg-sage-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sage-dark"
-            aria-label="Admin login — proceed to admin sign in"
-          >
-            Admin Login
+          <Link href="/admin/login" className="rounded-[24px] border border-slate-200 p-5 transition hover:border-[#4D694E] hover:shadow-sm">
+            <h2 className="text-lg font-semibold text-slate-900">Staff access</h2>
+            <p className="mt-2 text-sm text-slate-600">Support clinicians with secure scheduling and operations oversight.</p>
           </Link>
         </div>
       </section>

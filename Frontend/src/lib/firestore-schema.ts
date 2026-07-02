@@ -54,7 +54,7 @@ export interface AuditLog {
   doctorId?: string;
   slotId?: string;
   performedBy: "patient" | "doctor" | "admin" | "system";
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   timestamp: string; // ISO timestamp
   createdAt: string; // ISO timestamp
 }
@@ -76,7 +76,7 @@ export const CANCELLATION_ELIGIBLE_STATUSES = ["booked", "confirmed"] as const;
 export function canCancelAppointment(
   status: Appointment["status"]
 ): boolean {
-  return CANCELLATION_ELIGIBLE_STATUSES.includes(status as any);
+  return (CANCELLATION_ELIGIBLE_STATUSES as readonly string[]).includes(status);
 }
 
 // ============================================================

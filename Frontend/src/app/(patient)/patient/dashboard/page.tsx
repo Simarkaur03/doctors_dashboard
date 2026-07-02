@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarDays, ChevronRight, ClipboardList, Megaphone, User } from "lucide-react";
-import { useAuth } from "../../../auth/AuthContext";
-import { fetchNextAppointment, fetchUserProfile, PatientAppointment, PatientProfile } from "../../../lib/patient";
-import { formatDate } from "../../../lib/date-utils";
+import { ChevronRight, ClipboardList, Megaphone, User } from "lucide-react";
+import { useAuth } from "../../../../auth/AuthContext";
+import { fetchNextAppointment, fetchUserProfile, PatientAppointment, PatientProfile } from "../../../../lib/patient";
+import { formatDate } from "../../../../lib/date-utils";
 
 export default function PatientDashboardPage() {
   const { user } = useAuth();
@@ -27,7 +27,7 @@ export default function PatientDashboardPage() {
         ]);
         setProfile(profileData);
         setAppointment(nextAppointment);
-      } catch (err) {
+      } catch {
         setError("Something went wrong. Please try again.");
       } finally {
         setLoading(false);

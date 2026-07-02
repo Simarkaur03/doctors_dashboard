@@ -43,12 +43,11 @@ export function useAppointment(): UseAppointmentResult {
           toast.error(errorMsg);
           return false;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMsg =
-          err.message || "An error occurred while cancelling the appointment";
+          (err instanceof Error ? err.message : null) || "An error occurred while cancelling the appointment";
         setError(errorMsg);
         toast.error(errorMsg);
-        console.error("Cancellation error:", err);
         return false;
       } finally {
         setCancelling(null);

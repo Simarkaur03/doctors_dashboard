@@ -8,10 +8,12 @@ type AuthContextValue = {
   user: User | null;
   role: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<any>;
-  register: (email: string, password: string, name: string) => Promise<any>;
+  emailVerified: boolean;
+  login: (email: string, password: string) => Promise<unknown>;
+  register: (email: string, password: string, name: string) => Promise<unknown>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  resendVerification: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -20,11 +22,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       setRole(null);
+      setEmailVerified(Boolean(u?.emailVerified));
       if (u) {
         try {
           const snap = await getDoc(doc(db, "users", u.uid));
@@ -34,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             setRole(null);
           }
-        } catch (e) {
+        } catch {
           setRole(null);
         }
       }
@@ -47,10 +51,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     role,
     loading,
+    emailVerified,
     login: (email, password) => firebaseAuth.login(email, password),
     register: (email, password, name) => firebaseAuth.register(email, password, name),
     logout: () => firebaseAuth.logout(),
     resetPassword: (email) => firebaseAuth.resetPassword(email),
+    resendVerification: () => firebaseAuth.resendVerification(),
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

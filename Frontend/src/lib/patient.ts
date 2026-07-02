@@ -27,7 +27,7 @@ export interface PatientAppointment {
   time: string;
   reason?: string;
   status: BookingStatus;
-  createdAt: any;
+  createdAt: unknown;
   doctorName: string;
   doctorId: string;
   slotId?: string;
@@ -48,7 +48,7 @@ export interface PatientNotification {
   uid: string;
   message: string;
   read: boolean;
-  createdAt: any;
+  createdAt: unknown;
 }
 
 export interface PatientProfile {
