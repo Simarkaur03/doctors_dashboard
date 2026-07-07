@@ -7,7 +7,6 @@ export interface AppUser {
   role: UserRole;
   phone?: string;
   active?: boolean;
-  emailVerified?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

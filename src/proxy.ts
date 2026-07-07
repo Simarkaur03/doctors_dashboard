@@ -8,7 +8,6 @@ const publicPaths = new Set([
   "/admin/login",
   "/register",
   "/forgot-password",
-  "/verify-email",
   "/privacy-policy",
   "/terms-of-service",
   "/forbidden",
@@ -26,7 +25,7 @@ const JWKS = createRemoteJWKSet(
   )
 );
 
-function decodeUnverified(token: string): { email_verified?: boolean; sub?: string; exp?: number } | null {
+function decodeUnverified(token: string): { sub?: string; exp?: number } | null {
   try {
     const payload = JSON.parse(Buffer.from(token.split(".")[1], "base64").toString("utf8"));
     if (typeof payload.exp === "number" && payload.exp * 1000 < Date.now()) return null;
@@ -52,7 +51,7 @@ async function verifySessionToken(token: string) {
       issuer: `https://securetoken.google.com/${projectId}`,
       audience: projectId,
     });
-    return payload as { email_verified?: boolean; sub?: string };
+    return payload as { sub?: string };
   } catch {
     return null;
   }
@@ -74,10 +73,6 @@ export async function proxy(request: NextRequest) {
     const response = NextResponse.redirect(loginUrl);
     response.cookies.delete("__session");
     return response;
-  }
-
-  if (!claims.email_verified) {
-    return NextResponse.redirect(new URL("/verify-email", request.url));
   }
 
   return NextResponse.next();

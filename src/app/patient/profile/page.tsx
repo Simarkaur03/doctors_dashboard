@@ -68,20 +68,18 @@ export default function PatientProfilePage() {
 
   return (
     <AuthGuard requiredRole="patient">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-8">
+      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
         <div className="mx-auto max-w-2xl">
           <Card>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">Profile</p>
-            <h1 className="mt-2 text-3xl font-semibold text-slate-900">Your details</h1>
-            <p className="mt-2 text-sm text-slate-600">Keep your contact information current so we can reach you.</p>
+            <h1 className="text-xl font-semibold text-slate-900">Profile</h1>
 
             {loading ? (
-              <div className="mt-6 flex items-center gap-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Loading profile…
+                Loading…
               </div>
             ) : (
-              <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+              <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
                 <Input label="Email" type="email" value={email} disabled readOnly />
                 <Input
                   label="Full name"

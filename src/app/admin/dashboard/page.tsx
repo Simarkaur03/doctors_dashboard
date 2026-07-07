@@ -33,32 +33,24 @@ export default function AdminDashboardPage() {
 
   return (
     <AuthGuard requiredRole="admin">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-8">
-        <div className="mx-auto max-w-7xl">
-          <header className="flex flex-col gap-4 rounded-[32px] bg-white p-6 shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)] md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">Admin workspace</p>
-              <h1 className="mt-2 text-3xl font-semibold text-slate-900">Operations overview</h1>
-              <p className="mt-2 text-sm text-slate-600">Review the clinic schedule and keep care delivery moving smoothly.</p>
-            </div>
+      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
+        <div className="mx-auto max-w-5xl space-y-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
             <Button variant="secondary" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
             </Button>
-          </header>
+          </div>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-            <Card>
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-semibold text-slate-900">Recent appointments</h2>
-                  <p className="text-sm text-slate-500">Live updates from Firestore.</p>
-                </div>
-                <Badge>Live</Badge>
-              </div>
-              <div className="space-y-3">
+          <Card>
+            <h2 className="mb-3 text-base font-semibold text-slate-900">Appointments</h2>
+            {appointments.length === 0 ? (
+              <p className="text-sm text-slate-500">No appointments.</p>
+            ) : (
+              <div className="space-y-2">
                 {appointments.slice(0, 6).map((appointment) => (
-                  <div key={appointment.id} className="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
+                  <div key={appointment.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-3">
                     <div>
                       <p className="font-semibold text-slate-900">{appointment.patientName}</p>
                       <p className="text-sm text-slate-500">{appointment.doctorName} • {appointment.date} • {appointment.time}</p>
@@ -67,12 +59,8 @@ export default function AdminDashboardPage() {
                   </div>
                 ))}
               </div>
-            </Card>
-            <Card>
-              <h2 className="text-xl font-semibold text-slate-900">Administrative tools</h2>
-              <p className="mt-2 text-sm text-slate-500">Support patient scheduling, verify appointments, and manage communications.</p>
-            </Card>
-          </div>
+            )}
+          </Card>
         </div>
       </main>
     </AuthGuard>

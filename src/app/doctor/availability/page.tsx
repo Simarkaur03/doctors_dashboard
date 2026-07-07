@@ -210,55 +210,40 @@ function DoctorAvailabilityContent() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-8">
-        <div className="mx-auto max-w-5xl space-y-6">
-          <Card>
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFF3D5] text-[#4D694E]">
-                  <CalendarClock className="h-5 w-5" />
+      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
+        <div className="mx-auto max-w-5xl space-y-4">
+          <h1 className="text-xl font-semibold text-slate-900">Availability</h1>
+
+          {!calendarLoading && calendarConfigured ? (
+            <Card>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                  <CalendarClock className="h-4 w-4 text-[#4D694E]" />
+                  {calendarConnected ? "Google Calendar connected" : "Google Calendar"}
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Google Calendar</h2>
-                  <p className="text-sm text-slate-500">
-                    {calendarLoading
-                      ? "Checking connection…"
-                      : !calendarConfigured
-                        ? "Not set up for this project yet."
-                        : calendarConnected
-                          ? "Connected — bookings sync automatically."
-                          : "Not connected."}
-                  </p>
-                </div>
-              </div>
-              {!calendarLoading && calendarConfigured ? (
-                calendarConnected ? (
+                {calendarConnected ? (
                   <Button size="sm" variant="secondary" onClick={handleDisconnectCalendar} disabled={calendarBusy}>
                     {calendarBusy ? "Working…" : "Disconnect"}
                   </Button>
                 ) : (
                   <Button size="sm" onClick={handleConnectCalendar} disabled={calendarBusy}>
-                    {calendarBusy ? "Redirecting…" : "Connect Google Calendar"}
+                    {calendarBusy ? "Redirecting…" : "Connect"}
                   </Button>
-                )
-              ) : null}
-            </div>
-          </Card>
+                )}
+              </div>
+            </Card>
+          ) : null}
 
           <Card>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">Availability</p>
-            <h1 className="mt-2 text-3xl font-semibold text-slate-900">Recurring weekly hours</h1>
-            <p className="mt-2 text-sm text-slate-600">
-              Set your standard hours per weekday, then generate bookable slots for the next two weeks.
-            </p>
+            <h2 className="text-base font-semibold text-slate-900">Weekly Hours</h2>
 
             {loading || !recurring ? (
-              <div className="mt-6 flex items-center gap-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Loading availability…
+                Loading…
               </div>
             ) : (
-              <div className="mt-6 space-y-3">
+              <div className="mt-3 space-y-2">
                 {WEEKDAYS.map((day) => {
                   const config = recurring[day];
                   return (
@@ -307,15 +292,15 @@ function DoctorAvailabilityContent() {
 
                 <Button className="mt-2" onClick={handleGenerate} disabled={generating}>
                   {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  {generating ? "Generating…" : "Generate slots for next 14 days"}
+                  {generating ? "Generating…" : "Generate Slots"}
                 </Button>
               </div>
             )}
           </Card>
 
           <Card>
-            <h2 className="text-xl font-semibold text-slate-900">Manage individual slots</h2>
-            <div className="mt-4 max-w-xs">
+            <h2 className="text-base font-semibold text-slate-900">Slots</h2>
+            <div className="mt-3 max-w-xs">
               <Input label="Date" type="date" value={date} min={todayISO()} onChange={(event) => setDate(event.target.value)} />
             </div>
 

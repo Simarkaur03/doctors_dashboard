@@ -57,60 +57,55 @@ export default function DoctorPatientProfilePage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-8">
-        <div className="mx-auto max-w-4xl space-y-6">
+      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
+        <div className="mx-auto max-w-4xl space-y-4">
           <Link href="/doctor/patients" className="inline-flex items-center gap-2 text-sm font-semibold text-[#4D694E]">
-            <ArrowLeft className="h-4 w-4" /> Back to patients
+            <ArrowLeft className="h-4 w-4" /> Back
           </Link>
 
           {loading ? (
             <Card>
-              <div className="flex items-center gap-3 text-sm text-slate-600">
+              <div className="flex items-center gap-2 text-sm text-slate-600">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Loading patient…
+                Loading…
               </div>
             </Card>
           ) : notFound || !profile ? (
             <Card>
-              <p className="text-sm text-slate-600">This patient could not be found.</p>
+              <p className="text-sm text-slate-600">Patient not found.</p>
             </Card>
           ) : (
             <>
               <Card>
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#FFF3D5] text-[#4D694E]">
-                    <UserIcon className="h-7 w-7" />
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FFF3D5] text-[#4D694E]">
+                    <UserIcon className="h-5 w-5" />
                   </div>
-                  <div>
-                    <h1 className="text-2xl font-semibold text-slate-900">{profile.name}</h1>
-                    <p className="text-sm text-slate-500">Patient profile</p>
-                  </div>
+                  <h1 className="text-lg font-semibold text-slate-900">{profile.name}</h1>
                 </div>
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
                   <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <Mail className="h-4 w-4 text-[#4D694E]" /> {profile.email || "No email on file"}
+                    <Mail className="h-4 w-4 text-[#4D694E]" /> {profile.email || "—"}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <Phone className="h-4 w-4 text-[#4D694E]" /> {profile.phone || "No phone on file"}
+                    <Phone className="h-4 w-4 text-[#4D694E]" /> {profile.phone || "—"}
                   </div>
                   {profile.dateOfBirth ? (
-                    <div className="text-sm text-slate-600">Date of birth: {profile.dateOfBirth}</div>
+                    <div className="text-sm text-slate-600">DOB: {profile.dateOfBirth}</div>
                   ) : null}
                 </div>
               </Card>
 
               <Card>
-                <h2 className="text-xl font-semibold text-slate-900">Appointment history</h2>
+                <h2 className="mb-3 text-base font-semibold text-slate-900">Appointments</h2>
                 {appointments.length === 0 ? (
-                  <div className="mt-4 rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
-                    No appointments yet.
-                  </div>
+                  <p className="text-sm text-slate-500">No appointments yet.</p>
                 ) : (
-                  <div className="mt-4 space-y-2">
+                  <div className="space-y-2">
                     {appointments.map((appointment) => (
                       <div
                         key={appointment.id}
-                        className="flex items-center justify-between rounded-2xl border border-slate-200 p-4"
+                        className="flex items-center justify-between rounded-xl bg-slate-50 p-3"
                       >
                         <div>
                           <p className="font-semibold text-slate-900">

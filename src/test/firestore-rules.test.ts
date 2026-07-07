@@ -25,7 +25,7 @@ describe('Firestore security rules', () => {
   });
 
   it('allows a patient to create their own user document without custom role claims', async () => {
-    const patient = testEnv.authenticatedContext('patient-1', { email_verified: true });
+    const patient = testEnv.authenticatedContext('patient-1');
 
     await assertSucceeds(
       patient.firestore().doc('users/patient-1').set({
@@ -37,7 +37,7 @@ describe('Firestore security rules', () => {
   });
 
   it('blocks a patient from creating another user document', async () => {
-    const patient = testEnv.authenticatedContext('patient-1', { email_verified: true });
+    const patient = testEnv.authenticatedContext('patient-1');
 
     await assertFails(
       patient.firestore().doc('users/patient-2').set({
@@ -48,33 +48,18 @@ describe('Firestore security rules', () => {
     );
   });
 
-  it('allows a freshly signed-up (unverified) user to create their own profile', async () => {
-    // Registration calls createUserWithEmailAndPassword + setDoc before the
-    // user has clicked the verification link, so this must not require
-    // isVerified() — only reads/updates do.
-    const unverifiedPatient = testEnv.authenticatedContext('patient-unverified', { email_verified: false });
+  it('allows a patient to read their own profile immediately after signup', async () => {
+    const patient = testEnv.authenticatedContext('patient-3');
 
     await assertSucceeds(
-      unverifiedPatient.firestore().doc('users/patient-unverified').set({
-        uid: 'patient-unverified',
-        email: 'unverified@example.com',
-        role: 'patient',
-      })
-    );
-  });
-
-  it('blocks an unverified user from reading their own profile', async () => {
-    const unverifiedPatient = testEnv.authenticatedContext('patient-unverified-2', { email_verified: false });
-
-    await assertSucceeds(
-      unverifiedPatient.firestore().doc('users/patient-unverified-2').set({
-        uid: 'patient-unverified-2',
-        email: 'unverified2@example.com',
+      patient.firestore().doc('users/patient-3').set({
+        uid: 'patient-3',
+        email: 'patient3@example.com',
         role: 'patient',
       })
     );
 
-    await assertFails(unverifiedPatient.firestore().doc('users/patient-unverified-2').get());
+    await assertSucceeds(patient.firestore().doc('users/patient-3').get());
   });
 
   it('allows a doctor to create a slot with no custom role claim on the auth token', async () => {
@@ -85,7 +70,7 @@ describe('Firestore security rules', () => {
       await context.firestore().doc('users/doctor-1').set({ uid: 'doctor-1', email: 'doc@example.com', role: 'doctor' });
     });
 
-    const doctor = testEnv.authenticatedContext('doctor-1', { email_verified: true });
+    const doctor = testEnv.authenticatedContext('doctor-1');
 
     await assertSucceeds(
       doctor.firestore().doc('slots/doctor-1_2030-01-01_09:00').set({
@@ -112,7 +97,7 @@ describe('Firestore security rules', () => {
       });
     });
 
-    const doctor2 = testEnv.authenticatedContext('doctor-2', { email_verified: true });
+    const doctor2 = testEnv.authenticatedContext('doctor-2');
 
     await assertFails(
       doctor2.firestore().doc('slots/doctor-1_2030-01-02_09:00').update({
@@ -120,5 +105,14 @@ describe('Firestore security rules', () => {
         status: 'unavailable',
       })
     );
+  });
+
+  it('blocks an unauthenticated request from reading a user document', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().doc('users/patient-4').set({ uid: 'patient-4', email: 'patient4@example.com', role: 'patient' });
+    });
+
+    const anon = testEnv.unauthenticatedContext();
+    await assertFails(anon.firestore().doc('users/patient-4').get());
   });
 });

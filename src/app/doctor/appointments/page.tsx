@@ -63,40 +63,35 @@ export default function DoctorAppointmentsPage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-8">
-        <div className="mx-auto max-w-5xl">
-          <Card>
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">Appointments</p>
-                <h1 className="mt-2 text-3xl font-semibold text-slate-900">Manage your schedule</h1>
-              </div>
-              <div className="flex gap-2">
-                {(["upcoming", "past", "all"] as Filter[]).map((option) => (
-                  <button
-                    key={option}
-                    onClick={() => setFilter(option)}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold capitalize transition ${
-                      filter === option ? "bg-[#4D694E] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
+      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
+        <div className="mx-auto max-w-5xl space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="text-xl font-semibold text-slate-900">Appointments</h1>
+            <div className="flex gap-2">
+              {(["upcoming", "past", "all"] as Filter[]).map((option) => (
+                <button
+                  key={option}
+                  onClick={() => setFilter(option)}
+                  className={`rounded-full px-3 py-1.5 text-sm font-semibold capitalize transition ${
+                    filter === option ? "bg-[#4D694E] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
             </div>
+          </div>
 
+          <Card>
             {loading ? (
-              <div className="mt-6 flex items-center gap-3 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="flex items-center gap-2 text-sm text-slate-600">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Loading appointments…
+                Loading…
               </div>
             ) : filtered.length === 0 ? (
-              <div className="mt-6 rounded-2xl border border-dashed border-slate-200 p-10 text-center text-sm text-slate-500">
-                No {filter === "all" ? "" : filter} appointments.
-              </div>
+              <p className="text-sm text-slate-500">No {filter === "all" ? "" : filter} appointments.</p>
             ) : (
-              <div className="mt-6 space-y-3">
+              <div className="space-y-2">
                 {filtered.map((appointment) => (
                   <div
                     key={appointment.id}

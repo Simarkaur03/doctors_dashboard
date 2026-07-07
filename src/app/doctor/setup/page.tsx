@@ -63,16 +63,12 @@ export default function DoctorSetupPage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-    <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-8">
+    <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
       <div className="mx-auto max-w-xl">
         <Card>
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">Welcome</p>
-          <h1 className="mt-2 text-3xl font-semibold text-slate-900">Let&apos;s set up your workspace</h1>
-          <p className="mt-2 text-sm text-slate-600">
-            A few quick details so patients can find and book time with you. You can change these anytime from Availability.
-          </p>
+          <h1 className="text-xl font-semibold text-slate-900">Doctor Setup</h1>
 
-          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+          <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
             <Input label="Full name" value={name} onChange={(event) => setName(event.target.value)} required />
             <Input
               label="Specialty (optional)"

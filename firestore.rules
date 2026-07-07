@@ -6,10 +6,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isVerified() {
-      return isSignedIn() && request.auth.token.email_verified == true;
-    }
-
     function uid() {
       return request.auth.uid;
     }
@@ -59,57 +55,55 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read: if isVerified() && (isOwner(userId) || isDoctor());
-      // Signup creates this doc before the user has clicked the verification
-      // link, so create must not require isVerified() — only read/update do.
+      allow read: if isSignedIn() && (isOwner(userId) || isDoctor());
       allow create: if isSignedIn() && isOwner(userId)
         && request.resource.data.keys().hasAll(['email', 'role'])
         && request.resource.data.uid == userId
         && request.resource.data.role == 'patient';
-      allow update: if isVerified() && isOwner(userId)
+      allow update: if isSignedIn() && isOwner(userId)
         && request.resource.data.role == resource.data.role;
       allow delete: if false;
     }
 
     match /profiles/{profileId} {
-      allow read: if isVerified() && (isOwner(profileId) || isDoctor());
+      allow read: if isSignedIn() && (isOwner(profileId) || isDoctor());
       allow create: if isSignedIn() && isOwner(profileId)
         && request.resource.data.keys().hasAll(['ownerId', 'role'])
         && request.resource.data.ownerId == profileId
         && request.resource.data.role == role();
-      allow update: if isVerified() && isOwner(profileId)
+      allow update: if isSignedIn() && isOwner(profileId)
         && isImmutableRoleChange()
         && isImmutableOwnerChange();
       allow delete: if false;
     }
 
     match /patients/{patientId} {
-      allow read: if isVerified() && (isOwner(patientId) || isDoctor());
+      allow read: if isSignedIn() && (isOwner(patientId) || isDoctor());
       allow create: if isSignedIn() && isOwner(patientId)
         && request.resource.data.keys().hasAll(['ownerId', 'role'])
         && request.resource.data.ownerId == patientId
         && request.resource.data.role == 'patient';
-      allow update: if isVerified() && isOwner(patientId)
+      allow update: if isSignedIn() && isOwner(patientId)
         && isImmutableRoleChange()
         && isImmutableOwnerChange();
       allow delete: if false;
     }
 
     match /appointments/{appointmentId} {
-      allow read: if isVerified() && (
+      allow read: if isSignedIn() && (
         isOwner(resource.data.get('patientId', null)) ||
         isOwner(resource.data.get('uid', null)) ||
         isDoctor() ||
         isOwner(resource.data.get('doctorId', null))
       );
-      allow create: if isVerified() && isPatient()
+      allow create: if isSignedIn() && isPatient()
         && request.resource.data.keys().hasAll(['status'])
         && (
           request.resource.data.get('patientId', null) == uid() ||
           request.resource.data.get('uid', null) == uid()
         )
         && request.resource.data.status in ['pending', 'booked', 'confirmed'];
-      allow update: if isVerified() && isAppointmentCoreUnchanged() && (
+      allow update: if isSignedIn() && isAppointmentCoreUnchanged() && (
         (isPatient() && (
           isOwner(resource.data.get('patientId', null)) ||
           isOwner(resource.data.get('uid', null))
@@ -124,14 +118,14 @@ service cloud.firestore {
     }
 
     match /availability/{availabilityId} {
-      allow read: if isVerified();
-      allow create: if isVerified() && isDoctor()
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isDoctor()
         && request.resource.data.keys().hasAll(['doctorId', 'day', 'startTime', 'endTime'])
         && request.resource.data.doctorId == uid();
-      allow update: if isVerified() && isDoctor()
+      allow update: if isSignedIn() && isDoctor()
         && resource.data.doctorId == uid()
         && request.resource.data.doctorId == uid();
-      allow delete: if isVerified() && isDoctor() && resource.data.doctorId == uid();
+      allow delete: if isSignedIn() && isDoctor() && resource.data.doctorId == uid();
     }
 
     function isSlotCoreUnchanged() {
@@ -163,38 +157,38 @@ service cloud.firestore {
     }
 
     match /slots/{slotId} {
-      allow read: if isVerified();
-      allow create: if isVerified() && isDoctor()
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isDoctor()
         && request.resource.data.keys().hasAll(['doctorId', 'date', 'time'])
         && request.resource.data.doctorId == uid();
-      allow update: if isVerified() && (
+      allow update: if isSignedIn() && (
         (isDoctor() && resource.data.doctorId == uid() && request.resource.data.doctorId == uid()) ||
         isPatientBookingSlot() ||
         isPatientCancellingSlot()
       );
-      allow delete: if isVerified() && isDoctor() && resource.data.doctorId == uid();
+      allow delete: if isSignedIn() && isDoctor() && resource.data.doctorId == uid();
     }
 
     match /notifications/{notificationId} {
-      allow read: if isVerified() && (
+      allow read: if isSignedIn() && (
         isOwner(resource.data.get('userId', null)) ||
         isOwner(resource.data.get('uid', null)) ||
         isDoctor()
       );
-      allow create, update: if isVerified() && isDoctor();
+      allow create, update: if isSignedIn() && isDoctor();
       allow delete: if false;
     }
 
     match /doctorNotes/{noteId} {
-      allow read, write: if isVerified() && isDoctor();
+      allow read, write: if isSignedIn() && isDoctor();
     }
 
     match /healthReports/{reportId} {
-      allow read: if isVerified() && (isOwner(resource.data.patientId) || isDoctor());
-      allow create: if isVerified() && (
+      allow read: if isSignedIn() && (isOwner(resource.data.patientId) || isDoctor());
+      allow create: if isSignedIn() && (
         isOwner(request.resource.data.patientId) || isDoctor()
       );
-      allow update: if isVerified() && (isOwner(resource.data.patientId) || isDoctor());
+      allow update: if isSignedIn() && (isOwner(resource.data.patientId) || isDoctor());
       allow delete: if false;
     }
 

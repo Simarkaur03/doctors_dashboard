@@ -21,9 +21,9 @@ export default function SlotCard({ slot, onClick }: SlotCardProps) {
       onClick={() => isAvailable && onClick(slot)}
       disabled={!isAvailable}
       className={`
-        w-full flex items-center justify-between p-4 rounded-xl border transition-all
-        ${isAvailable 
-          ? 'bg-white border-[#D9E1E3] hover:border-[#2E7D6E] hover:shadow-md cursor-pointer' 
+        w-full flex items-center justify-between p-3 rounded-xl border transition-all
+        ${isAvailable
+          ? 'bg-white border-[#D9E1E3] hover:border-[#2E7D6E] cursor-pointer'
           : 'bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed'
         }
       `}

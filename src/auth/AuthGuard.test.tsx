@@ -20,12 +20,11 @@ describe('AuthGuard', () => {
     mockUseAuth.mockReset();
   });
 
-  it('renders children for an authenticated, verified patient', () => {
+  it('renders children for an authenticated patient', () => {
     mockUseAuth.mockReturnValue({
       user: { uid: 'patient-1' },
       role: 'patient',
       loading: false,
-      emailVerified: true,
     });
 
     render(
@@ -43,7 +42,6 @@ describe('AuthGuard', () => {
       user: null,
       role: null,
       loading: false,
-      emailVerified: false,
     });
 
     render(

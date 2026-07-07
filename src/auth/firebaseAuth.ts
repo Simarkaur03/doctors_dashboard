@@ -5,7 +5,6 @@ import {
   signOut,
   setPersistence,
   browserLocalPersistence,
-  sendEmailVerification,
   User,
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -15,7 +14,6 @@ export async function register(email: string, password: string, name: string) {
   await setPersistence(auth, browserLocalPersistence);
   const cred = await createUserWithEmailAndPassword(auth, email, password);
   const user = cred.user;
-  await sendEmailVerification(user);
   const userDoc = {
     uid: user.uid,
     name,
@@ -39,12 +37,6 @@ export async function logout() {
 
 export async function resetPassword(email: string) {
   return sendPasswordResetEmail(auth, email);
-}
-
-export async function resendVerification() {
-  if (auth.currentUser) {
-    await sendEmailVerification(auth.currentUser);
-  }
 }
 
 export async function fetchUserRole(uid: string) {

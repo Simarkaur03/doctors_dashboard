@@ -49,9 +49,6 @@ exports.bookAppointment = (0, https_1.onCall)(async (request) => {
     if (!request.auth) {
         throw new https_1.HttpsError("unauthenticated", "User must be logged in to book appointments");
     }
-    if (!request.auth.token.email_verified) {
-        throw new https_1.HttpsError("failed-precondition", "Please verify your email before booking appointments");
-    }
     const patientId = request.auth.uid;
     const { slotId, reason } = request.data;
     if (!slotId) {

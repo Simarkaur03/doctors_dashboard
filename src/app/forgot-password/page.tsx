@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
+import { Logo } from "../../components/ui/Logo";
 
 export default function ForgotPasswordPage() {
   const { resetPassword } = useAuth();
@@ -28,22 +29,23 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FFF3D5] px-4 py-16">
-      <section className="mx-auto flex max-w-md flex-col rounded-[32px] bg-white p-8 shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)]">
-        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">Password reset</p>
-        <h1 className="mt-3 text-3xl font-semibold text-slate-900">Recover access</h1>
-        <p className="mt-2 text-sm text-slate-600">Enter your email and we’ll send a secure reset link.</p>
+    <main className="flex min-h-screen items-center justify-center bg-[#FFF3D5] px-4">
+      <section className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm">
+        <Logo />
+        <h1 className="mt-4 text-center text-xl font-semibold text-slate-900">Reset Password</h1>
 
-        <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <Input label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
-          {status ? <div className="rounded-2xl bg-[#FFF3D5] p-3 text-sm text-[#4D694E]">{status}</div> : null}
+          {status ? <div className="rounded-xl bg-[#FFF3D5] p-3 text-sm text-[#4D694E]">{status}</div> : null}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {loading ? "Sending" : "Send reset link"}
+            Send Reset Link
           </Button>
         </form>
 
-        <Link href="/patient/login" className="mt-6 text-sm font-medium text-[#4D694E]">Back to sign in</Link>
+        <Link href="/patient/login" className="mt-4 block text-center text-sm font-medium text-[#4D694E]">
+          Back to sign in
+        </Link>
       </section>
     </main>
   );

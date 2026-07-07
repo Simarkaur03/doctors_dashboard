@@ -8,10 +8,14 @@ import { useAuth } from "../../../auth/AuthContext";
 import { login, fetchUserRole } from "../../../auth/firebaseAuth";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
+import { Logo } from "../../../components/ui/Logo";
+
+type StaffRole = "doctor" | "admin";
 
 export default function AdminLoginPage() {
   const { logout, user, role } = useAuth();
   const router = useRouter();
+  const [staffRole, setStaffRole] = useState<StaffRole>("doctor");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -38,22 +42,34 @@ export default function AdminLoginPage() {
         setError("This login is for staff accounts only.");
       }
     } catch {
-      setError("We couldn't sign you in. Please verify your email and password.");
+      setError("Incorrect email or password.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#FFF3D5] px-4 py-16">
-      <section className="w-full max-w-md rounded-[32px] bg-white p-8 shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)]">
-        <div className="mb-8 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">Staff login</p>
-          <h1 className="mt-3 text-3xl font-semibold text-slate-900">Welcome back</h1>
-          <p className="mt-2 text-sm text-slate-600">Secure access for doctors and administrators.</p>
+    <main className="flex min-h-screen items-center justify-center bg-[#FFF3D5] px-4">
+      <section className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm">
+        <Logo />
+        <h1 className="mt-4 text-center text-xl font-semibold text-slate-900">Staff Login</h1>
+
+        <div className="mt-4 grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
+          {(["doctor", "admin"] as StaffRole[]).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setStaffRole(option)}
+              className={`rounded-lg py-2 text-sm font-semibold capitalize transition ${
+                staffRole === option ? "bg-white text-[#4D694E] shadow-sm" : "text-slate-500"
+              }`}
+            >
+              {option}
+            </button>
+          ))}
         </div>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
           <Input label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
           <div className="relative">
             <Input label="Password" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required />
@@ -62,16 +78,16 @@ export default function AdminLoginPage() {
             </button>
           </div>
 
-          {error ? <div className="rounded-2xl bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
+          {error ? <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {loading ? "Signing in" : "Sign in"}
+            {staffRole === "admin" ? "Admin Login" : "Doctor Login"}
           </Button>
         </form>
 
-        <div className="mt-6 flex flex-col gap-2 text-sm text-slate-600">
-          <Link href="/forgot-password" className="font-medium text-[#4D694E]">Forgot password?</Link>
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <Link href="/forgot-password" className="font-medium text-[#4D694E]">Forgot Password</Link>
           <Link href="/patient/login" className="font-medium text-[#4D694E]">Patient login</Link>
         </div>
       </section>

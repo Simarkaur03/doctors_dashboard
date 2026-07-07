@@ -17,13 +17,10 @@ type AuthContextValue = {
   user: User | null;
   role: string | null;
   loading: boolean;
-  emailVerified: boolean;
   login: (email: string, password: string) => Promise<unknown>;
   register: (email: string, password: string, name: string) => Promise<unknown>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  resendVerification: () => Promise<void>;
-  refreshEmailVerified: () => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -32,13 +29,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [emailVerified, setEmailVerified] = useState(false);
 
   useEffect(() => {
     const unsub = onIdTokenChanged(auth, async (u) => {
       setUser(u);
       setRole(null);
-      setEmailVerified(Boolean(u?.emailVerified));
       if (u) {
         const token = await u.getIdToken();
         setSessionCookie(token);
@@ -61,28 +56,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsub();
   }, []);
 
-  const refreshEmailVerified = async () => {
-    if (!auth.currentUser) return false;
-    await auth.currentUser.reload();
-    const token = await auth.currentUser.getIdToken(true);
-    setSessionCookie(token);
-    const verified = auth.currentUser.emailVerified;
-    setEmailVerified(verified);
-    setUser(auth.currentUser);
-    return verified;
-  };
-
   const value: AuthContextValue = {
     user,
     role,
     loading,
-    emailVerified,
     login: (email, password) => firebaseAuth.login(email, password),
     register: (email, password, name) => firebaseAuth.register(email, password, name),
     logout: () => firebaseAuth.logout(),
     resetPassword: (email) => firebaseAuth.resetPassword(email),
-    resendVerification: () => firebaseAuth.resendVerification(),
-    refreshEmailVerified,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
