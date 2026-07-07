@@ -16,7 +16,7 @@ export default function PatientNotificationsPage() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    const unsubscribe = onSnapshot(query(collection(db, "notifications"), where("uid", "==", user.uid)), (snapshot) => {
+    const unsubscribe = onSnapshot(query(collection(db, "notifications"), where("userId", "==", user.uid)), (snapshot) => {
       setNotifications(snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<NotificationItem, "id">) })));
       setLoading(false);
     });

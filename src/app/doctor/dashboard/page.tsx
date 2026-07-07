@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { CalendarDays, ClipboardList, Users, Bell, FileText, Settings, Loader2 } from "lucide-react";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
@@ -22,15 +23,15 @@ export default function DoctorDashboardPage() {
     if (!user?.uid) return;
 
     const appointmentsQuery = query(collection(db, "appointments"), where("doctorId", "==", user.uid));
-    const notificationsQuery = query(collection(db, "notifications"), where("uid", "==", user.uid));
+    const notificationsQuery = query(collection(db, "notifications"), where("userId", "==", user.uid));
 
     const unsubscribeAppointments = onSnapshot(appointmentsQuery, (snapshot) => {
       const data = snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<Appointment, "id">) }));
       setAppointments(data);
       setStats({
         appointments: data.length,
-        patients: new Set(data.map((item) => item.uid)).size,
-        pending: data.filter((item) => item.status === "pending").length,
+        patients: new Set(data.map((item) => item.patientId)).size,
+        pending: data.filter((item) => item.status === "booked").length,
         completed: data.filter((item) => item.status === "completed").length,
       });
       setLoading(false);
@@ -57,7 +58,9 @@ export default function DoctorDashboardPage() {
               <h1 className="mt-2 text-3xl font-semibold text-slate-900">Care overview</h1>
               <p className="mt-2 text-sm text-slate-600">Monitor appointments, patients, and secure updates in one place.</p>
             </div>
-            <Button>New note</Button>
+            <Link href="/doctor/availability">
+              <Button>Manage availability</Button>
+            </Link>
           </header>
 
           <section className="grid gap-4 md:grid-cols-4">
@@ -139,20 +142,24 @@ export default function DoctorDashboardPage() {
           </section>
 
           <section className="grid gap-4 md:grid-cols-2">
-            <Card className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">Availability</h3>
-                <p className="text-sm text-slate-500">Manage service hours.</p>
-              </div>
-              <Settings className="h-5 w-5 text-[#4D694E]" />
-            </Card>
-            <Card className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">Clinical notes</h3>
-                <p className="text-sm text-slate-500">Keep documentation close at hand.</p>
-              </div>
-              <FileText className="h-5 w-5 text-[#4D694E]" />
-            </Card>
+            <Link href="/doctor/availability" className="block">
+              <Card className="flex items-center justify-between transition hover:border-[#4D694E]">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Availability</h3>
+                  <p className="text-sm text-slate-500">Manage service hours and slots.</p>
+                </div>
+                <Settings className="h-5 w-5 text-[#4D694E]" />
+              </Card>
+            </Link>
+            <Link href="/doctor/patients" className="block">
+              <Card className="flex items-center justify-between transition hover:border-[#4D694E]">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Patients</h3>
+                  <p className="text-sm text-slate-500">Browse full patient records.</p>
+                </div>
+                <Users className="h-5 w-5 text-[#4D694E]" />
+              </Card>
+            </Link>
           </section>
         </div>
       </main>

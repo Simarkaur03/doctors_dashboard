@@ -14,7 +14,8 @@
   "dependencies": {
     "doctor-dashboard-frontend": "file:..",
     "firebase-admin": "^13.10.0",
-    "firebase-functions": "^7.2.5"
+    "firebase-functions": "^7.2.5",
+    "googleapis": "^144.0.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0"

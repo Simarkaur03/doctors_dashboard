@@ -21,16 +21,19 @@ export interface Appointment {
   time: string; // HH:mm format
   duration: number; // minutes
   status: "booked" | "confirmed" | "completed" | "cancelled" | "no-show";
+  reason?: string;
   cancelledBy?: "patient" | "doctor" | "admin";
   cancelledAt?: string; // ISO timestamp
   bookedAt: string; // ISO timestamp
   createdAt: string; // ISO timestamp
   updatedAt: string; // ISO timestamp
+  calendarEventId?: string;
 }
 
 export interface Slot {
   id: string;
   doctorId: string;
+  doctorName: string;
   date: string; // ISO date string
   time: string; // HH:mm format
   duration: number; // minutes

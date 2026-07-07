@@ -1,25 +1,17 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../../../auth/AuthContext";
+import { login, fetchUserRole } from "../../../auth/firebaseAuth";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
 
-export default function PatientLoginPage() {
-  return (
-    <Suspense>
-      <PatientLoginContent />
-    </Suspense>
-  );
-}
-
-function PatientLoginContent() {
-  const { login, user, role } = useAuth();
+export default function AdminLoginPage() {
+  const { logout, user, role } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -27,7 +19,8 @@ function PatientLoginContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && role === "patient") router.replace("/patient/dashboard");
+    if (user && role === "admin") router.replace("/admin/dashboard");
+    else if (user && role === "doctor") router.replace("/doctor/dashboard");
   }, [user, role, router]);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -36,8 +29,14 @@ function PatientLoginContent() {
     setLoading(true);
 
     try {
-      await login(email.trim(), password);
-      router.replace(searchParams.get("redirect") || "/patient/dashboard");
+      const signedInUser = await login(email.trim(), password);
+      const signedInRole = await fetchUserRole(signedInUser.uid);
+      if (signedInRole === "admin") router.replace("/admin/dashboard");
+      else if (signedInRole === "doctor") router.replace("/doctor/dashboard");
+      else {
+        await logout();
+        setError("This login is for staff accounts only.");
+      }
     } catch {
       setError("We couldn't sign you in. Please verify your email and password.");
     } finally {
@@ -49,9 +48,9 @@ function PatientLoginContent() {
     <main className="flex min-h-screen items-center justify-center bg-[#FFF3D5] px-4 py-16">
       <section className="w-full max-w-md rounded-[32px] bg-white p-8 shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)]">
         <div className="mb-8 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">Patient login</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">Staff login</p>
           <h1 className="mt-3 text-3xl font-semibold text-slate-900">Welcome back</h1>
-          <p className="mt-2 text-sm text-slate-600">Secure access to your appointments and care updates.</p>
+          <p className="mt-2 text-sm text-slate-600">Secure access for doctors and administrators.</p>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
@@ -73,15 +72,8 @@ function PatientLoginContent() {
 
         <div className="mt-6 flex flex-col gap-2 text-sm text-slate-600">
           <Link href="/forgot-password" className="font-medium text-[#4D694E]">Forgot password?</Link>
-          <Link href="/register" className="font-medium text-[#4D694E]">Create an account</Link>
+          <Link href="/patient/login" className="font-medium text-[#4D694E]">Patient login</Link>
         </div>
-
-        <p className="mt-6 text-center text-xs text-slate-400">
-          By signing in, you agree to our{" "}
-          <Link href="/terms-of-service" className="underline hover:text-[#4D694E]">Terms of Service</Link>
-          {" "}and{" "}
-          <Link href="/privacy-policy" className="underline hover:text-[#4D694E]">Privacy Policy</Link>.
-        </p>
       </section>
     </main>
   );

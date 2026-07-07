@@ -48,3 +48,6 @@ DEPLOYMENT_GUIDE.md
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+.vercel
+.env*

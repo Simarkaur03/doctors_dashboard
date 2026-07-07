@@ -20,8 +20,8 @@ export default function PatientDashboardPage() {
   useEffect(() => {
     if (!user?.uid) return;
 
-    const appointmentsQuery = query(collection(db, "appointments"), where("uid", "==", user.uid));
-    const notificationsQuery = query(collection(db, "notifications"), where("uid", "==", user.uid));
+    const appointmentsQuery = query(collection(db, "appointments"), where("patientId", "==", user.uid));
+    const notificationsQuery = query(collection(db, "notifications"), where("userId", "==", user.uid));
 
     const unsubscribeAppointments = onSnapshot(appointmentsQuery, (snapshot) => {
       const data = snapshot.docs.map((doc) => ({ id: doc.id, ...(doc.data() as Omit<Appointment, "id">) }));

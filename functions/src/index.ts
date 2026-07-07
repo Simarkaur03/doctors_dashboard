@@ -1,9 +1,18 @@
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 
 admin.initializeApp();
 
 const db = admin.firestore();
+
+export {
+  startGoogleCalendarConnect,
+  googleCalendarCallback,
+  disconnectGoogleCalendar,
+  getGoogleCalendarStatus,
+} from "./google-calendar";
+import { createCalendarEventForAppointment, deleteCalendarEventForAppointment } from "./google-calendar";
 
 interface CancellationRequest {
   appointmentId: string;
@@ -35,6 +44,156 @@ interface SlotData {
   [key: string]: unknown;
 }
 
+interface BookingRequest {
+  slotId: string;
+  reason?: string;
+}
+
+interface BookingResponse {
+  success: boolean;
+  message: string;
+  appointmentId: string;
+  slotId: string;
+}
+
+export const bookAppointment = onCall<BookingRequest>(
+  async (request): Promise<BookingResponse> => {
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be logged in to book appointments");
+    }
+    if (!request.auth.token.email_verified) {
+      throw new HttpsError("failed-precondition", "Please verify your email before booking appointments");
+    }
+
+    const patientId = request.auth.uid;
+    const { slotId, reason } = request.data;
+
+    if (!slotId) {
+      throw new HttpsError("invalid-argument", "Missing required field: slotId");
+    }
+
+    const patientDoc = await db.collection("users").doc(patientId).get();
+    const patientData = patientDoc.data();
+    if (!patientData || patientData.role !== "patient") {
+      throw new HttpsError("permission-denied", "Only patients can book appointments");
+    }
+
+    const calendarSync: {
+      details: {
+        appointmentId: string;
+        doctorId: string;
+        patientName: string;
+        date: string;
+        time: string;
+        duration: number;
+        reason?: string;
+      } | null;
+    } = { details: null };
+
+    try {
+      const result = await db.runTransaction(async (transaction) => {
+        const slotRef = db.collection("slots").doc(slotId);
+        const slotSnap = await transaction.get(slotRef);
+
+        if (!slotSnap.exists) {
+          throw new HttpsError("not-found", "This appointment slot no longer exists");
+        }
+
+        const slotData = slotSnap.data() as SlotData & {
+          date: string;
+          time: string;
+          duration?: number;
+          doctorName?: string;
+        };
+
+        if (slotData.status !== "available") {
+          throw new HttpsError("failed-precondition", "This appointment slot is no longer available");
+        }
+
+        const slotDateTime = new Date(`${slotData.date}T${slotData.time}:00`);
+        if (Number.isNaN(slotDateTime.getTime()) || slotDateTime.getTime() < Date.now()) {
+          throw new HttpsError("failed-precondition", "You cannot book an appointment in the past");
+        }
+
+        const appointmentRef = db.collection("appointments").doc();
+        const now = new Date().toISOString();
+        const duration = slotData.duration || 30;
+
+        transaction.set(appointmentRef, {
+          patientId,
+          patientName: patientData.name || "Patient",
+          doctorId: slotData.doctorId,
+          doctorName: slotData.doctorName || "Doctor",
+          slotId,
+          date: slotData.date,
+          time: slotData.time,
+          duration,
+          status: "booked",
+          reason: reason || "",
+          bookedAt: now,
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        transaction.update(slotRef, {
+          status: "booked",
+          appointmentId: appointmentRef.id,
+          updatedAt: now,
+        });
+
+        const auditLogRef = db.collection("auditLogs").doc();
+        transaction.set(auditLogRef, {
+          action: "appointment_booked",
+          appointmentId: appointmentRef.id,
+          patientId,
+          slotId,
+          doctorId: slotData.doctorId,
+          performedBy: "patient",
+          timestamp: now,
+          createdAt: now,
+        });
+
+        calendarSync.details = {
+          appointmentId: appointmentRef.id,
+          doctorId: slotData.doctorId,
+          patientName: patientData.name || "Patient",
+          date: slotData.date,
+          time: slotData.time,
+          duration,
+          reason,
+        };
+
+        return {
+          success: true,
+          message: "Appointment booked successfully",
+          appointmentId: appointmentRef.id,
+          slotId,
+        };
+      });
+
+      if (calendarSync.details) {
+        const details = calendarSync.details;
+        try {
+          const eventId = await createCalendarEventForAppointment(details);
+          if (eventId) {
+            await db.collection("appointments").doc(details.appointmentId).update({ calendarEventId: eventId });
+          }
+        } catch (err) {
+          console.error("Google Calendar sync failed for booking", err);
+        }
+      }
+
+      return result as BookingResponse;
+    } catch (error: unknown) {
+      if (error instanceof HttpsError) {
+        throw error;
+      }
+      console.error("bookAppointment failed", error);
+      throw new HttpsError("internal", "An error occurred while booking the appointment");
+    }
+  }
+);
+
 export const cancelAppointment = onCall<CancellationRequest>(
   async (request): Promise<CancellationResponse> => {
     if (!request.auth) {
@@ -51,6 +210,8 @@ export const cancelAppointment = onCall<CancellationRequest>(
       throw new HttpsError("invalid-argument", "Missing required fields: appointmentId, patientId, slotId, doctorId");
     }
 
+    let cancelledCalendarEventId: string | null = null;
+
     try {
       const result = await db.runTransaction(async (transaction) => {
         const appointmentRef = db.collection("appointments").doc(appointmentId);
@@ -60,7 +221,8 @@ export const cancelAppointment = onCall<CancellationRequest>(
           throw new HttpsError("not-found", "Appointment not found");
         }
 
-        const appointmentData = appointmentSnap.data() as AppointmentData;
+        const appointmentData = appointmentSnap.data() as AppointmentData & { calendarEventId?: string };
+        cancelledCalendarEventId = appointmentData.calendarEventId || null;
 
         if (appointmentData.patientId !== patientId) {
           throw new HttpsError("permission-denied", "This appointment does not belong to you");
@@ -102,7 +264,7 @@ export const cancelAppointment = onCall<CancellationRequest>(
 
         transaction.update(slotRef, {
           status: "available",
-          appointmentId: admin.firestore.FieldValue.delete(),
+          appointmentId: FieldValue.delete(),
           updatedAt: now,
         });
 
@@ -126,11 +288,20 @@ export const cancelAppointment = onCall<CancellationRequest>(
         };
       });
 
+      if (cancelledCalendarEventId) {
+        try {
+          await deleteCalendarEventForAppointment(doctorId, cancelledCalendarEventId);
+        } catch (err) {
+          console.error("Google Calendar sync failed for cancellation", err);
+        }
+      }
+
       return result as CancellationResponse;
     } catch (error: unknown) {
       if (error instanceof HttpsError) {
         throw error;
       }
+      console.error("cancelAppointment failed", error);
       throw new HttpsError("internal", "An error occurred while cancelling the appointment");
     }
   }

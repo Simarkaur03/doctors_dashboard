@@ -1,18 +1,12 @@
 /**
  * Appointment Cancellation Service
- * Handles communication with Firebase Cloud Function for transactional cancellations
+ * Cancels an appointment with a Firestore batched write (patient's own
+ * appointment -> cancelled, linked slot -> available again).
  */
 
-import { httpsCallable } from "firebase/functions";
-import { functions } from "./firebase";
+import { doc, writeBatch } from "firebase/firestore";
+import { db } from "./firebase";
 import type { Appointment } from "./firestore-schema";
-
-export interface CancellationPayload {
-  appointmentId: string;
-  patientId: string;
-  slotId: string;
-  doctorId: string;
-}
 
 export interface CancellationResponse {
   success: boolean;
@@ -21,57 +15,43 @@ export interface CancellationResponse {
   slotId: string;
 }
 
-/**
- * Cancel an appointment using a Cloud Function with Firestore transaction
- */
 export async function cancelAppointment(
   appointment: Appointment,
   patientId: string
 ): Promise<CancellationResponse> {
+  if (appointment.patientId !== patientId) {
+    throw new Error("This appointment does not belong to you.");
+  }
+
   try {
-    const cancelAppointmentFn = httpsCallable<
-      CancellationPayload,
-      CancellationResponse
-    >(functions, "cancelAppointment");
+    const now = new Date().toISOString();
+    const batch = writeBatch(db);
 
-    const payload: CancellationPayload = {
-      appointmentId: appointment.id,
-      patientId,
-      slotId: appointment.slotId,
-      doctorId: appointment.doctorId,
-    };
+    batch.update(doc(db, "appointments", appointment.id), {
+      status: "cancelled",
+      cancelledBy: "patient",
+      cancelledAt: now,
+      updatedAt: now,
+    });
 
-    const result = await cancelAppointmentFn(payload);
+    if (appointment.slotId) {
+      batch.update(doc(db, "slots", appointment.slotId), {
+        status: "available",
+        appointmentId: null,
+        updatedAt: now,
+      });
+    }
+
+    await batch.commit();
 
     return {
-      success: result.data.success,
-      message: result.data.message,
-      appointmentId: result.data.appointmentId,
-      slotId: result.data.slotId,
+      success: true,
+      message: "Appointment cancelled successfully",
+      appointmentId: appointment.id,
+      slotId: appointment.slotId,
     };
   } catch (error: unknown) {
-    const err = error as { code?: string; message?: string };
-    const message = err?.code === "functions/not-found"
-      ? "Cancellation service is not available. Please try again later."
-      : err?.message || "Unable to cancel appointment. Please try again.";
-
+    const message = error instanceof Error ? error.message : "Unable to cancel appointment. Please try again.";
     throw new Error(message);
-  }
-}
-
-/**
- * Verify if an appointment can still be cancelled (status hasn't changed)
- */
-export async function verifyAppointmentStatus(appointmentId: string): Promise<boolean> {
-  try {
-    const verifyStatusFn = httpsCallable<
-      { appointmentId: string },
-      { canBeCancelled: boolean }
-    >(functions, "verifyAppointmentStatus");
-
-    const result = await verifyStatusFn({ appointmentId });
-    return result.data.canBeCancelled;
-  } catch {
-    return false;
   }
 }

@@ -1,8 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { onIdTokenChanged, User } from "firebase/auth";
 import { auth, db } from "../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import * as firebaseAuth from "./firebaseAuth";
+
+function setSessionCookie(token: string) {
+  const secure = typeof location !== "undefined" && location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `__session=${token}; path=/; max-age=3600; SameSite=Lax${secure}`;
+}
+
+function clearSessionCookie() {
+  document.cookie = "__session=; path=/; max-age=0";
+}
 
 type AuthContextValue = {
   user: User | null;
@@ -14,6 +23,7 @@ type AuthContextValue = {
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   resendVerification: () => Promise<void>;
+  refreshEmailVerified: () => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -25,11 +35,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [emailVerified, setEmailVerified] = useState(false);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (u) => {
+    const unsub = onIdTokenChanged(auth, async (u) => {
       setUser(u);
       setRole(null);
       setEmailVerified(Boolean(u?.emailVerified));
       if (u) {
+        const token = await u.getIdToken();
+        setSessionCookie(token);
         try {
           const snap = await getDoc(doc(db, "users", u.uid));
           if (snap.exists()) {
@@ -41,11 +53,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch {
           setRole(null);
         }
+      } else {
+        clearSessionCookie();
       }
       setLoading(false);
     });
     return () => unsub();
   }, []);
+
+  const refreshEmailVerified = async () => {
+    if (!auth.currentUser) return false;
+    await auth.currentUser.reload();
+    const token = await auth.currentUser.getIdToken(true);
+    setSessionCookie(token);
+    const verified = auth.currentUser.emailVerified;
+    setEmailVerified(verified);
+    setUser(auth.currentUser);
+    return verified;
+  };
 
   const value: AuthContextValue = {
     user,
@@ -57,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout: () => firebaseAuth.logout(),
     resetPassword: (email) => firebaseAuth.resetPassword(email),
     resendVerification: () => firebaseAuth.resendVerification(),
+    refreshEmailVerified,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

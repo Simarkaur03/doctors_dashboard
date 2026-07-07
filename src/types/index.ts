@@ -33,13 +33,13 @@ export interface Patient {
 
 export interface Appointment {
   id: string;
-  uid: string;
+  patientId: string;
   patientName: string;
   doctorName: string;
   doctorId: string;
   date: string;
   time: string;
-  status: "pending" | "confirmed" | "cancelled" | "completed";
+  status: "booked" | "confirmed" | "cancelled" | "completed" | "no-show";
   reason?: string;
   createdAt?: string;
   slotId?: string;
@@ -59,7 +59,7 @@ export interface Slot {
 
 export interface NotificationItem {
   id: string;
-  uid: string;
+  userId: string;
   title: string;
   message: string;
   read: boolean;

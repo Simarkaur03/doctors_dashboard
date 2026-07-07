@@ -3,16 +3,16 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, CalendarDays, Home, ListChecks, User } from "lucide-react";
+import { Bell, CalendarDays, Home, ListChecks, LogOut, User } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 
 const navItems = [
   { label: "Home", href: "/patient/dashboard", icon: Home },
-  { label: "Book", href: "/book", icon: CalendarDays },
-  { label: "Appointments", href: "/my-appointments", icon: ListChecks },
-  { label: "Profile", href: "/profile", icon: User },
+  { label: "Book", href: "/patient/book", icon: CalendarDays },
+  { label: "Appointments", href: "/patient/appointments", icon: ListChecks },
+  { label: "Profile", href: "/patient/profile", icon: User },
 ];
 
 export default function PatientLayout({
@@ -22,21 +22,27 @@ export default function PatientLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, role, loading } = useAuth();
+  const { user, role, loading, logout } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
+  const isLoginPage = pathname === "/patient/login";
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/patient/login");
+  };
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!isLoginPage && !loading && !user) {
       router.replace("/patient/login");
     }
-  }, [loading, user, router]);
+  }, [isLoginPage, loading, user, router]);
 
   useEffect(() => {
     if (!user?.uid) return;
 
     const unreadQuery = query(
       collection(db, "notifications"),
-      where("uid", "==", user.uid),
+      where("userId", "==", user.uid),
       where("read", "==", false)
     );
 
@@ -48,10 +54,14 @@ export default function PatientLayout({
   }, [user]);
 
   useEffect(() => {
-    if (!loading && user && role && role !== "patient") {
+    if (!isLoginPage && !loading && user && role && role !== "patient") {
       router.replace("/");
     }
-  }, [loading, role, user, router]);
+  }, [isLoginPage, loading, role, user, router]);
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (loading || !user) {
     return (
@@ -118,6 +128,14 @@ export default function PatientLayout({
                 </p>
               )}
             </div>
+
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-red-50 hover:text-red-600"
+            >
+              <LogOut className="h-5 w-5" />
+              <span>Sign out</span>
+            </button>
           </div>
         </aside>
 

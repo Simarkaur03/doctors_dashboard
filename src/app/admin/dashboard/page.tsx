@@ -1,17 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { collection, onSnapshot, query } from "firebase/firestore";
+import { LogOut } from "lucide-react";
 import { db } from "../../../lib/firebase";
 import { useAuth } from "../../../auth/AuthContext";
 import { AuthGuard } from "../../../components/providers/AuthGuard";
 import { Card } from "../../../components/ui/Card";
 import { Badge } from "../../../components/ui/Badge";
+import { Button } from "../../../components/ui/Button";
 import type { Appointment } from "../../../types";
 
 export default function AdminDashboardPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/admin/login");
+  };
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -26,10 +35,16 @@ export default function AdminDashboardPage() {
     <AuthGuard requiredRole="admin">
       <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-8">
         <div className="mx-auto max-w-7xl">
-          <header className="rounded-[32px] bg-white p-6 shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)]">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">Admin workspace</p>
-            <h1 className="mt-2 text-3xl font-semibold text-slate-900">Operations overview</h1>
-            <p className="mt-2 text-sm text-slate-600">Review the clinic schedule and keep care delivery moving smoothly.</p>
+          <header className="flex flex-col gap-4 rounded-[32px] bg-white p-6 shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)] md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">Admin workspace</p>
+              <h1 className="mt-2 text-3xl font-semibold text-slate-900">Operations overview</h1>
+              <p className="mt-2 text-sm text-slate-600">Review the clinic schedule and keep care delivery moving smoothly.</p>
+            </div>
+            <Button variant="secondary" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </Button>
           </header>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">

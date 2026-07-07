@@ -33,11 +33,123 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cleanupOldCancelledAppointments = exports.verifyAppointmentStatus = exports.cancelAppointment = void 0;
+exports.cleanupOldCancelledAppointments = exports.verifyAppointmentStatus = exports.cancelAppointment = exports.bookAppointment = exports.getGoogleCalendarStatus = exports.disconnectGoogleCalendar = exports.googleCalendarCallback = exports.startGoogleCalendarConnect = void 0;
 const https_1 = require("firebase-functions/v2/https");
 const admin = __importStar(require("firebase-admin"));
+const firestore_1 = require("firebase-admin/firestore");
 admin.initializeApp();
 const db = admin.firestore();
+var google_calendar_1 = require("./google-calendar");
+Object.defineProperty(exports, "startGoogleCalendarConnect", { enumerable: true, get: function () { return google_calendar_1.startGoogleCalendarConnect; } });
+Object.defineProperty(exports, "googleCalendarCallback", { enumerable: true, get: function () { return google_calendar_1.googleCalendarCallback; } });
+Object.defineProperty(exports, "disconnectGoogleCalendar", { enumerable: true, get: function () { return google_calendar_1.disconnectGoogleCalendar; } });
+Object.defineProperty(exports, "getGoogleCalendarStatus", { enumerable: true, get: function () { return google_calendar_1.getGoogleCalendarStatus; } });
+const google_calendar_2 = require("./google-calendar");
+exports.bookAppointment = (0, https_1.onCall)(async (request) => {
+    if (!request.auth) {
+        throw new https_1.HttpsError("unauthenticated", "User must be logged in to book appointments");
+    }
+    if (!request.auth.token.email_verified) {
+        throw new https_1.HttpsError("failed-precondition", "Please verify your email before booking appointments");
+    }
+    const patientId = request.auth.uid;
+    const { slotId, reason } = request.data;
+    if (!slotId) {
+        throw new https_1.HttpsError("invalid-argument", "Missing required field: slotId");
+    }
+    const patientDoc = await db.collection("users").doc(patientId).get();
+    const patientData = patientDoc.data();
+    if (!patientData || patientData.role !== "patient") {
+        throw new https_1.HttpsError("permission-denied", "Only patients can book appointments");
+    }
+    const calendarSync = { details: null };
+    try {
+        const result = await db.runTransaction(async (transaction) => {
+            const slotRef = db.collection("slots").doc(slotId);
+            const slotSnap = await transaction.get(slotRef);
+            if (!slotSnap.exists) {
+                throw new https_1.HttpsError("not-found", "This appointment slot no longer exists");
+            }
+            const slotData = slotSnap.data();
+            if (slotData.status !== "available") {
+                throw new https_1.HttpsError("failed-precondition", "This appointment slot is no longer available");
+            }
+            const slotDateTime = new Date(`${slotData.date}T${slotData.time}:00`);
+            if (Number.isNaN(slotDateTime.getTime()) || slotDateTime.getTime() < Date.now()) {
+                throw new https_1.HttpsError("failed-precondition", "You cannot book an appointment in the past");
+            }
+            const appointmentRef = db.collection("appointments").doc();
+            const now = new Date().toISOString();
+            const duration = slotData.duration || 30;
+            transaction.set(appointmentRef, {
+                patientId,
+                patientName: patientData.name || "Patient",
+                doctorId: slotData.doctorId,
+                doctorName: slotData.doctorName || "Doctor",
+                slotId,
+                date: slotData.date,
+                time: slotData.time,
+                duration,
+                status: "booked",
+                reason: reason || "",
+                bookedAt: now,
+                createdAt: now,
+                updatedAt: now,
+            });
+            transaction.update(slotRef, {
+                status: "booked",
+                appointmentId: appointmentRef.id,
+                updatedAt: now,
+            });
+            const auditLogRef = db.collection("auditLogs").doc();
+            transaction.set(auditLogRef, {
+                action: "appointment_booked",
+                appointmentId: appointmentRef.id,
+                patientId,
+                slotId,
+                doctorId: slotData.doctorId,
+                performedBy: "patient",
+                timestamp: now,
+                createdAt: now,
+            });
+            calendarSync.details = {
+                appointmentId: appointmentRef.id,
+                doctorId: slotData.doctorId,
+                patientName: patientData.name || "Patient",
+                date: slotData.date,
+                time: slotData.time,
+                duration,
+                reason,
+            };
+            return {
+                success: true,
+                message: "Appointment booked successfully",
+                appointmentId: appointmentRef.id,
+                slotId,
+            };
+        });
+        if (calendarSync.details) {
+            const details = calendarSync.details;
+            try {
+                const eventId = await (0, google_calendar_2.createCalendarEventForAppointment)(details);
+                if (eventId) {
+                    await db.collection("appointments").doc(details.appointmentId).update({ calendarEventId: eventId });
+                }
+            }
+            catch (err) {
+                console.error("Google Calendar sync failed for booking", err);
+            }
+        }
+        return result;
+    }
+    catch (error) {
+        if (error instanceof https_1.HttpsError) {
+            throw error;
+        }
+        console.error("bookAppointment failed", error);
+        throw new https_1.HttpsError("internal", "An error occurred while booking the appointment");
+    }
+});
 exports.cancelAppointment = (0, https_1.onCall)(async (request) => {
     if (!request.auth) {
         throw new https_1.HttpsError("unauthenticated", "User must be logged in to cancel appointments");
@@ -49,6 +161,7 @@ exports.cancelAppointment = (0, https_1.onCall)(async (request) => {
     if (!appointmentId || !patientId || !slotId || !doctorId) {
         throw new https_1.HttpsError("invalid-argument", "Missing required fields: appointmentId, patientId, slotId, doctorId");
     }
+    let cancelledCalendarEventId = null;
     try {
         const result = await db.runTransaction(async (transaction) => {
             const appointmentRef = db.collection("appointments").doc(appointmentId);
@@ -57,6 +170,7 @@ exports.cancelAppointment = (0, https_1.onCall)(async (request) => {
                 throw new https_1.HttpsError("not-found", "Appointment not found");
             }
             const appointmentData = appointmentSnap.data();
+            cancelledCalendarEventId = appointmentData.calendarEventId || null;
             if (appointmentData.patientId !== patientId) {
                 throw new https_1.HttpsError("permission-denied", "This appointment does not belong to you");
             }
@@ -88,7 +202,7 @@ exports.cancelAppointment = (0, https_1.onCall)(async (request) => {
             });
             transaction.update(slotRef, {
                 status: "available",
-                appointmentId: admin.firestore.FieldValue.delete(),
+                appointmentId: firestore_1.FieldValue.delete(),
                 updatedAt: now,
             });
             const auditLogRef = db.collection("auditLogs").doc();
@@ -109,12 +223,21 @@ exports.cancelAppointment = (0, https_1.onCall)(async (request) => {
                 slotId,
             };
         });
+        if (cancelledCalendarEventId) {
+            try {
+                await (0, google_calendar_2.deleteCalendarEventForAppointment)(doctorId, cancelledCalendarEventId);
+            }
+            catch (err) {
+                console.error("Google Calendar sync failed for cancellation", err);
+            }
+        }
         return result;
     }
     catch (error) {
         if (error instanceof https_1.HttpsError) {
             throw error;
         }
+        console.error("cancelAppointment failed", error);
         throw new https_1.HttpsError("internal", "An error occurred while cancelling the appointment");
     }
 });

@@ -19,10 +19,10 @@ export default function ForgotPasswordPage() {
     setStatus(null);
     try {
       await resetPassword(email.trim());
-      setStatus("Reset instructions were sent to your email.");
     } catch {
-      setStatus("We could not send reset instructions right now. Please try again.");
+      // Ignore errors (including user-not-found) so the response can't be used to enumerate accounts.
     } finally {
+      setStatus("If an account exists for that email, reset instructions have been sent.");
       setLoading(false);
     }
   };

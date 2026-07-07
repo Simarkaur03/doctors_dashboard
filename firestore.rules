@@ -21,7 +21,12 @@ service cloud.firestore {
     }
 
     function role() {
-      return request.auth.token.role != null ? request.auth.token.role : userRole();
+      // request.auth.token.role throws if the custom claim was never set
+      // (true for every user in this app, since nothing sets custom claims),
+      // so it must be read with get(), not dot-notation.
+      return request.auth.token.get('role', null) != null
+        ? request.auth.token.get('role', null)
+        : userRole();
     }
 
     function isDoctor() {
@@ -44,9 +49,20 @@ service cloud.firestore {
       return request.resource.data.ownerId == resource.data.ownerId;
     }
 
+    function isAppointmentCoreUnchanged() {
+      return request.resource.data.doctorId == resource.data.doctorId
+        && request.resource.data.get('slotId', null) == resource.data.get('slotId', null)
+        && request.resource.data.date == resource.data.date
+        && request.resource.data.time == resource.data.time
+        && request.resource.data.get('patientId', null) == resource.data.get('patientId', null)
+        && request.resource.data.get('uid', null) == resource.data.get('uid', null);
+    }
+
     match /users/{userId} {
       allow read: if isVerified() && (isOwner(userId) || isDoctor());
-      allow create: if isVerified() && isOwner(userId)
+      // Signup creates this doc before the user has clicked the verification
+      // link, so create must not require isVerified() — only read/update do.
+      allow create: if isSignedIn() && isOwner(userId)
         && request.resource.data.keys().hasAll(['email', 'role'])
         && request.resource.data.uid == userId
         && request.resource.data.role == 'patient';
@@ -57,7 +73,7 @@ service cloud.firestore {
 
     match /profiles/{profileId} {
       allow read: if isVerified() && (isOwner(profileId) || isDoctor());
-      allow create: if isVerified() && isOwner(profileId)
+      allow create: if isSignedIn() && isOwner(profileId)
         && request.resource.data.keys().hasAll(['ownerId', 'role'])
         && request.resource.data.ownerId == profileId
         && request.resource.data.role == role();
@@ -69,7 +85,7 @@ service cloud.firestore {
 
     match /patients/{patientId} {
       allow read: if isVerified() && (isOwner(patientId) || isDoctor());
-      allow create: if isVerified() && isOwner(patientId)
+      allow create: if isSignedIn() && isOwner(patientId)
         && request.resource.data.keys().hasAll(['ownerId', 'role'])
         && request.resource.data.ownerId == patientId
         && request.resource.data.role == 'patient';
@@ -81,51 +97,88 @@ service cloud.firestore {
 
     match /appointments/{appointmentId} {
       allow read: if isVerified() && (
-        (resource.data.patientId != null && isOwner(resource.data.patientId)) ||
-        (resource.data.uid != null && isOwner(resource.data.uid)) ||
+        isOwner(resource.data.get('patientId', null)) ||
+        isOwner(resource.data.get('uid', null)) ||
         isDoctor() ||
-        (resource.data.doctorId != null && isOwner(resource.data.doctorId))
+        isOwner(resource.data.get('doctorId', null))
       );
       allow create: if isVerified() && isPatient()
         && request.resource.data.keys().hasAll(['status'])
         && (
-          request.resource.data.patientId == uid() ||
-          request.resource.data.uid == uid()
+          request.resource.data.get('patientId', null) == uid() ||
+          request.resource.data.get('uid', null) == uid()
         )
         && request.resource.data.status in ['pending', 'booked', 'confirmed'];
-      allow update: if isVerified() && (
+      allow update: if isVerified() && isAppointmentCoreUnchanged() && (
         (isPatient() && (
-          (resource.data.patientId != null && isOwner(resource.data.patientId)) ||
-          (resource.data.uid != null && isOwner(resource.data.uid))
-        ) && (
-          request.resource.data.patientId == resource.data.patientId ||
-          request.resource.data.uid == resource.data.uid
-        )) ||
+          isOwner(resource.data.get('patientId', null)) ||
+          isOwner(resource.data.get('uid', null))
+        )
+          // Patients may only cancel their own booked/confirmed appointment,
+          // not mark it completed or otherwise tamper with its status.
+          && resource.data.status in ['booked', 'confirmed']
+          && request.resource.data.status == 'cancelled') ||
         (isDoctor() && resource.data.doctorId != null && isOwner(resource.data.doctorId))
       );
       allow delete: if false;
     }
 
-    match /availability/{slotId} {
+    match /availability/{availabilityId} {
       allow read: if isVerified();
-      allow create, update: if isVerified() && isDoctor()
-        && request.resource.data.keys().hasAll(['doctorId', 'date', 'time'])
+      allow create: if isVerified() && isDoctor()
+        && request.resource.data.keys().hasAll(['doctorId', 'day', 'startTime', 'endTime'])
+        && request.resource.data.doctorId == uid();
+      allow update: if isVerified() && isDoctor()
+        && resource.data.doctorId == uid()
         && request.resource.data.doctorId == uid();
       allow delete: if isVerified() && isDoctor() && resource.data.doctorId == uid();
     }
 
+    function isSlotCoreUnchanged() {
+      return request.resource.data.doctorId == resource.data.doctorId
+        && request.resource.data.date == resource.data.date
+        && request.resource.data.time == resource.data.time;
+    }
+
+    // A patient books a slot directly (no server-side function on the free
+    // Spark plan): flips available -> booked. Ownership is enforced on the
+    // appointment doc itself, created in the same client transaction.
+    function isPatientBookingSlot() {
+      return isPatient()
+        && resource.data.status == 'available'
+        && request.resource.data.status == 'booked'
+        && isSlotCoreUnchanged();
+    }
+
+    // A patient cancels their own appointment: flips booked -> available.
+    // The linked appointment must already exist and belong to the caller,
+    // so a patient can't free up someone else's booked slot.
+    function isPatientCancellingSlot() {
+      return isPatient()
+        && resource.data.status == 'booked'
+        && request.resource.data.status == 'available'
+        && isSlotCoreUnchanged()
+        && resource.data.appointmentId is string
+        && get(/databases/$(database)/documents/appointments/$(resource.data.appointmentId)).data.patientId == uid();
+    }
+
     match /slots/{slotId} {
       allow read: if isVerified();
-      allow create, update: if isVerified() && isDoctor()
+      allow create: if isVerified() && isDoctor()
         && request.resource.data.keys().hasAll(['doctorId', 'date', 'time'])
         && request.resource.data.doctorId == uid();
+      allow update: if isVerified() && (
+        (isDoctor() && resource.data.doctorId == uid() && request.resource.data.doctorId == uid()) ||
+        isPatientBookingSlot() ||
+        isPatientCancellingSlot()
+      );
       allow delete: if isVerified() && isDoctor() && resource.data.doctorId == uid();
     }
 
     match /notifications/{notificationId} {
       allow read: if isVerified() && (
-        (resource.data.userId != null && isOwner(resource.data.userId)) ||
-        (resource.data.uid != null && isOwner(resource.data.uid)) ||
+        isOwner(resource.data.get('userId', null)) ||
+        isOwner(resource.data.get('uid', null)) ||
         isDoctor()
       );
       allow create, update: if isVerified() && isDoctor();
@@ -149,12 +202,9 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // calendarSettings holds Google OAuth tokens; only Cloud Functions (Admin SDK) may read/write it.
     match /calendarSettings/{settingId} {
-      allow read: if isVerified() && isDoctor() && resource.data.doctorId == uid();
-      allow create, update: if isVerified() && isDoctor()
-        && request.resource.data.keys().hasAll(['doctorId'])
-        && request.resource.data.doctorId == uid();
-      allow delete: if false;
+      allow read, write: if false;
     }
 
     match /{document=**} {

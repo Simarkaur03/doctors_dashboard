@@ -1,15 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
 import { Button } from "../../components/ui/Button";
 
 export default function VerifyEmailPage() {
-  const { user, resendVerification, emailVerified } = useAuth();
+  const { user, resendVerification, refreshEmailVerified, emailVerified } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
+
+  const checkVerified = useCallback(async () => {
+    setChecking(true);
+    try {
+      const verified = await refreshEmailVerified();
+      if (verified) {
+        router.replace("/patient/dashboard");
+      }
+    } finally {
+      setChecking(false);
+    }
+  }, [refreshEmailVerified, router]);
+
+  useEffect(() => {
+    if (emailVerified) {
+      router.replace("/patient/dashboard");
+      return;
+    }
+    const onFocus = () => checkVerified();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [emailVerified, checkVerified, router]);
 
   const handleResend = async () => {
     setLoading(true);
@@ -34,6 +59,10 @@ export default function VerifyEmailPage() {
           {emailVerified ? "Your email is verified." : "We sent a verification message to " + user?.email + ". Please confirm it to continue."}
         </p>
         <div className="mt-6 space-y-3">
+          <Button className="w-full" onClick={checkVerified} disabled={checking}>
+            {checking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {checking ? "Checking" : "I've verified — continue"}
+          </Button>
           <Button className="w-full" onClick={handleResend} disabled={loading}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {loading ? "Sending" : "Resend verification email"}
