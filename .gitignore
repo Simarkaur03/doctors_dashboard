@@ -24,6 +24,9 @@ firebase-debug.log
 .DS_Store
 Thumbs.db
 
+# Local reference-only tooling repo (never push)
+ECC-main/
+
 #md files
 
 
