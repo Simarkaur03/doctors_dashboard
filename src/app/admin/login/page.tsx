@@ -50,7 +50,7 @@ export default function AdminLoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#FFF3D5] px-4">
-      <section className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm">
+      <section className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-md">
         <Logo />
         <h1 className="mt-4 text-center text-xl font-semibold text-slate-900">Staff Login</h1>
 
@@ -87,8 +87,8 @@ export default function AdminLoginPage() {
         </form>
 
         <div className="mt-4 flex items-center justify-between text-sm">
-          <Link href="/forgot-password" className="font-medium text-[#4D694E]">Forgot Password</Link>
-          <Link href="/patient/login" className="font-medium text-[#4D694E]">Patient login</Link>
+          <Link href="/forgot-password" className="rounded-lg font-medium text-[#4D694E] transition duration-150 hover:text-[#3c5140] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4D694E] focus-visible:ring-offset-2">Forgot Password</Link>
+          <Link href="/patient/login" className="rounded-lg font-medium text-[#4D694E] transition duration-150 hover:text-[#3c5140] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4D694E] focus-visible:ring-offset-2">Patient login</Link>
         </div>
       </section>
     </main>

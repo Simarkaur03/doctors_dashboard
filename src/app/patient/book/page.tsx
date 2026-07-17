@@ -73,7 +73,7 @@ export default function PatientBookPage() {
 
   return (
     <AuthGuard requiredRole="patient">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-[#FFF3D5] p-4 md:p-6">
         <div className="mx-auto max-w-4xl space-y-4">
           <Card>
             <div className="max-w-xs">

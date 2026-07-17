@@ -48,14 +48,14 @@ export default function CancellationDialog({
           <button
             onClick={onCancel}
             disabled={isLoading}
-            className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-50 disabled:opacity-50"
+            className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 transition duration-150 hover:bg-slate-50 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
           >
             Keep
           </button>
           <button
             onClick={onConfirm}
             disabled={isLoading}
-            className="flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-white bg-red-600 transition-colors hover:bg-red-700 disabled:opacity-50"
+            className="flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-white bg-red-600 shadow-sm transition duration-150 hover:bg-red-700 hover:shadow-md active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
           >
             {isLoading ? "Cancelling…" : "Cancel"}
           </button>

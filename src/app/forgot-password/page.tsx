@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#FFF3D5] px-4">
-      <section className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm">
+      <section className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-md">
         <Logo />
         <h1 className="mt-4 text-center text-xl font-semibold text-slate-900">Reset Password</h1>
 
@@ -43,7 +43,10 @@ export default function ForgotPasswordPage() {
           </Button>
         </form>
 
-        <Link href="/patient/login" className="mt-4 block text-center text-sm font-medium text-[#4D694E]">
+        <Link
+          href="/patient/login"
+          className="mt-4 block rounded-lg text-center text-sm font-medium text-[#4D694E] transition duration-150 hover:text-[#3c5140] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4D694E] focus-visible:ring-offset-2"
+        >
           Back to sign in
         </Link>
       </section>

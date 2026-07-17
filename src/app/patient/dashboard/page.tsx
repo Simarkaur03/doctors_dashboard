@@ -42,15 +42,15 @@ export default function PatientDashboardPage() {
 
   return (
     <AuthGuard requiredRole="patient">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-[#FFF3D5] p-4 md:p-6">
         <div className="mx-auto flex max-w-5xl flex-col gap-4">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
             <div className="flex gap-2">
-              <Link href="/patient/notifications" className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 hover:border-[#4D694E]" aria-label="Notifications">
+              <Link href="/patient/notifications" className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm transition duration-150 hover:border-[#4D694E] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4D694E] focus-visible:ring-offset-2" aria-label="Notifications">
                 <BellRing className="h-4 w-4" />
               </Link>
-              <Link href="/patient/reports" className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 hover:border-[#4D694E]" aria-label="Reports">
+              <Link href="/patient/reports" className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm transition duration-150 hover:border-[#4D694E] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4D694E] focus-visible:ring-offset-2" aria-label="Reports">
                 <FileText className="h-4 w-4" />
               </Link>
             </div>

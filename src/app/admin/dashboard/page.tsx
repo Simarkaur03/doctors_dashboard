@@ -50,7 +50,7 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="space-y-2">
                 {appointments.slice(0, 6).map((appointment) => (
-                  <div key={appointment.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-3">
+                  <div key={appointment.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-3 transition-colors duration-150 hover:bg-slate-100">
                     <div>
                       <p className="font-semibold text-slate-900">{appointment.patientName}</p>
                       <p className="text-sm text-slate-500">{appointment.doctorName} • {appointment.date} • {appointment.time}</p>

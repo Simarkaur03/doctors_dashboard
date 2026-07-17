@@ -48,7 +48,7 @@ export default function DoctorDashboardPage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-[#FFF3D5] p-4 md:p-6">
         <div className="mx-auto flex max-w-6xl flex-col gap-4">
           <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
 

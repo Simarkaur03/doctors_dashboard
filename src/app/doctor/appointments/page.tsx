@@ -63,7 +63,7 @@ export default function DoctorAppointmentsPage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-[#FFF3D5] p-4 md:p-6">
         <div className="mx-auto max-w-5xl space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="text-xl font-semibold text-slate-900">Appointments</h1>

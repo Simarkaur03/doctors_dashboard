@@ -43,7 +43,7 @@ export default function DoctorPatientsPage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-[#FFF3D5] p-4 md:p-6">
         <div className="mx-auto max-w-4xl space-y-4">
           <h1 className="text-xl font-semibold text-slate-900">Patients</h1>
 
@@ -71,7 +71,7 @@ export default function DoctorPatientsPage() {
                   <Link
                     key={patient.uid}
                     href={`/doctor/patients/${patient.uid}`}
-                    className="flex items-center gap-3 rounded-xl p-3 transition hover:bg-slate-50"
+                    className="flex items-center gap-3 rounded-xl p-3 transition duration-150 hover:bg-slate-50 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4D694E] focus-visible:ring-offset-2"
                   >
                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FFF3D5] text-[#4D694E]">
                       <User className="h-4 w-4" />

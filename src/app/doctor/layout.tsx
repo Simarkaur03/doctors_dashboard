@@ -64,7 +64,7 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-screen bg-[#FFF3D5]">
       <div className="md:flex md:min-h-screen">
-        <aside className="hidden w-full max-w-xs shrink-0 border-r border-slate-200 bg-white px-4 py-6 md:flex md:flex-col md:justify-between">
+        <aside className="hidden w-full max-w-xs shrink-0 border-r border-slate-200 bg-white px-4 py-6 md:sticky md:top-0 md:flex md:h-screen md:flex-col md:justify-between md:overflow-y-auto">
           <div>
             <Logo />
             <nav className="mt-6 space-y-1">
@@ -75,8 +75,8 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                      isActive ? "bg-[#4D694E] text-white" : "text-slate-700 hover:bg-[#4D694E]/10"
+                    className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4D694E] focus-visible:ring-offset-2 ${
+                      isActive ? "bg-[#4D694E] text-white shadow-sm" : "text-slate-700 hover:bg-[#4D694E]/10"
                     }`}
                   >
                     <Icon className="h-5 w-5" />
@@ -89,7 +89,7 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-red-50 hover:text-red-600"
+            className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition duration-150 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
           >
             <LogOut className="h-5 w-5" />
             <span>Sign out</span>
@@ -99,7 +99,7 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
         <div className="flex justify-end px-4 pt-3 md:hidden">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-red-600 shadow-sm"
+            className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-sm font-semibold text-red-600 shadow-sm transition duration-150 hover:shadow-md active:scale-[0.98]"
           >
             <LogOut className="h-4 w-4" />
             Sign out
@@ -118,8 +118,8 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex min-h-[48px] flex-1 flex-col items-center justify-center rounded-xl px-2 text-[11px] font-semibold transition ${
-                  isActive ? "bg-[#4D694E] text-white" : "text-slate-500 hover:bg-slate-100"
+                className={`flex min-h-[48px] flex-1 flex-col items-center justify-center rounded-xl px-2 text-[11px] font-semibold transition duration-150 ${
+                  isActive ? "bg-[#4D694E] text-white shadow-sm" : "text-slate-500 hover:bg-slate-100"
                 }`}
               >
                 <Icon className="h-5 w-5" />

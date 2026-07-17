@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BackLink } from "../../components/ui/BackLink";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -8,7 +8,9 @@ export const metadata: Metadata = {
 export default function TermsOfServicePage() {
   return (
     <main className="min-h-screen bg-[#FFF3D5] px-4 py-12">
-      <div className="mx-auto max-w-3xl rounded-[32px] bg-white p-8 shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)] md:p-12">
+      <div className="mx-auto max-w-3xl space-y-3">
+        <BackLink href="/" label="Back to home" />
+      <div className="rounded-[32px] bg-white p-8 shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)] md:p-12">
         <h1 className="text-3xl font-semibold text-[#24302A]">
           Terms of Service
         </h1>
@@ -101,15 +103,7 @@ export default function TermsOfServicePage() {
             </p>
           </section>
         </div>
-
-        <div className="mt-8 border-t border-[#DDE8E1] pt-6">
-          <Link
-            href="/"
-            className="text-sm font-medium text-[#4D694E] hover:underline"
-          >
-            Back to home
-          </Link>
-        </div>
+      </div>
       </div>
     </main>
   );

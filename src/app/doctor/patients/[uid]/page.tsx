@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
-import { ArrowLeft, Loader2, Mail, Phone, User as UserIcon } from "lucide-react";
+import { Loader2, Mail, Phone, User as UserIcon } from "lucide-react";
 import { db } from "../../../../lib/firebase";
 import { AuthGuard } from "../../../../components/providers/AuthGuard";
 import { Card } from "../../../../components/ui/Card";
 import { Badge } from "../../../../components/ui/Badge";
+import { BackLink } from "../../../../components/ui/BackLink";
 import type { Appointment } from "../../../../lib/firestore-schema";
 
 interface PatientProfile {
@@ -57,11 +57,9 @@ export default function DoctorPatientProfilePage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-[#FFF3D5] p-4 md:p-6">
         <div className="mx-auto max-w-4xl space-y-4">
-          <Link href="/doctor/patients" className="inline-flex items-center gap-2 text-sm font-semibold text-[#4D694E]">
-            <ArrowLeft className="h-4 w-4" /> Back
-          </Link>
+          <BackLink href="/doctor/patients" label="Back to patients" />
 
           {loading ? (
             <Card>

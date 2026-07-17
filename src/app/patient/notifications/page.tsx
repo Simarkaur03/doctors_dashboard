@@ -7,6 +7,7 @@ import { db } from "../../../lib/firebase";
 import { useAuth } from "../../../auth/AuthContext";
 import { AuthGuard } from "../../../components/providers/AuthGuard";
 import { Card } from "../../../components/ui/Card";
+import { BackLink } from "../../../components/ui/BackLink";
 import type { NotificationItem } from "../../../types";
 
 export default function PatientNotificationsPage() {
@@ -25,8 +26,9 @@ export default function PatientNotificationsPage() {
 
   return (
     <AuthGuard requiredRole="patient">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
-        <div className="mx-auto max-w-2xl">
+      <main className="bg-[#FFF3D5] p-4 md:p-6">
+        <div className="mx-auto max-w-2xl space-y-3">
+          <BackLink href="/patient/dashboard" />
           <Card>
             <h1 className="text-xl font-semibold text-slate-900">Notifications</h1>
             {loading ? (
