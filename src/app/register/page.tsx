@@ -26,7 +26,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register(email.trim(), password, name.trim());
-      router.replace("/verify-email");
+      router.replace("/patient/dashboard");
     } catch (err) {
       setError(mapAuthError(err));
     } finally {

@@ -36,7 +36,7 @@ function PatientLoginContent() {
     // bounced to /forbidden by resolvePostLoginRedirect before the real
     // role is known.
     if (authLoading) return;
-    if (user) router.replace(resolvePostLoginRedirect(user, role));
+    if (user) router.replace(resolvePostLoginRedirect(role));
   }, [authLoading, user, role, router]);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -48,10 +48,10 @@ function PatientLoginContent() {
       const signedInUser = await login(email.trim(), password);
       const signedInRole = await fetchUserRole(signedInUser.uid);
       const redirect = sanitizeRedirectParam(searchParams.get("redirect"));
-      if (signedInUser.emailVerified && signedInRole === "patient" && redirect) {
+      if (signedInRole === "patient" && redirect) {
         router.replace(redirect);
       } else {
-        router.replace(resolvePostLoginRedirect(signedInUser, signedInRole));
+        router.replace(resolvePostLoginRedirect(signedInRole));
       }
     } catch (err) {
       setError(mapAuthError(err));

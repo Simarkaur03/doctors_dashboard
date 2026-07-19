@@ -17,14 +17,11 @@ function clearSessionCookie() {
 type AuthContextValue = {
   user: User | null;
   role: string | null;
-  emailVerified: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
   register: (email: string, password: string, name: string) => Promise<User>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-  resendVerification: () => Promise<void>;
-  refreshEmailVerified: () => Promise<boolean>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -32,7 +29,6 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<string | null>(null);
-  const [emailVerified, setEmailVerified] = useState(false);
   const [loading, setLoading] = useState(true);
   // Tracks the last (uid, role) pair we already asked the server to sync
   // into the signed __role cookie, so a token refresh (roughly hourly)
@@ -43,7 +39,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsub = onIdTokenChanged(auth, async (u) => {
       setUser(u);
       setRole(null);
-      setEmailVerified(Boolean(u?.emailVerified));
       if (u) {
         const token = await u.getIdToken();
         setSessionCookie(token);
@@ -88,29 +83,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsub();
   }, []);
 
-  const refreshEmailVerified = async () => {
-    if (!auth.currentUser) return false;
-    await auth.currentUser.reload();
-    const verified = auth.currentUser.emailVerified;
-    setEmailVerified(verified);
-    if (verified) {
-      const token = await auth.currentUser.getIdToken(true);
-      setSessionCookie(token);
-    }
-    return verified;
-  };
-
   const value: AuthContextValue = {
     user,
     role,
-    emailVerified,
     loading,
     login: (email, password) => firebaseAuth.login(email, password),
     register: (email, password, name) => firebaseAuth.register(email, password, name),
     logout: () => firebaseAuth.logout(),
     resetPassword: (email) => firebaseAuth.resetPassword(email),
-    resendVerification: () => firebaseAuth.resendVerification(),
-    refreshEmailVerified,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

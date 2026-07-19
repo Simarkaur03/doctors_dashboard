@@ -15,7 +15,7 @@ import { Logo } from "../../../components/ui/Logo";
 type StaffRole = "doctor" | "admin";
 
 export default function AdminLoginPage() {
-  const { logout, user, role, emailVerified } = useAuth();
+  const { logout, user, role } = useAuth();
   const router = useRouter();
   const [staffRole, setStaffRole] = useState<StaffRole>("doctor");
   const [email, setEmail] = useState("");
@@ -26,14 +26,12 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     if (!user) return;
-    if (!emailVerified) {
-      router.replace("/verify-email");
-    } else if (role === "admin") {
+    if (role === "admin") {
       router.replace("/admin/dashboard");
     } else if (role === "doctor") {
       router.replace("/doctor/dashboard");
     }
-  }, [user, role, emailVerified, router]);
+  }, [user, role, router]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -42,10 +40,6 @@ export default function AdminLoginPage() {
 
     try {
       const signedInUser = await login(email.trim(), password);
-      if (!signedInUser.emailVerified) {
-        router.replace("/verify-email");
-        return;
-      }
       const signedInRole = await fetchUserRole(signedInUser.uid);
       if (signedInRole === "admin" || signedInRole === "doctor") {
         // Middleware gates /admin and /doctor on the __role cookie, set by

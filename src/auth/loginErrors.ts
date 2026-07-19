@@ -1,5 +1,4 @@
 import { FirebaseError } from "firebase/app";
-import type { User } from "firebase/auth";
 import { ApiError } from "../lib/adminApi";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -39,8 +38,7 @@ const DASHBOARD_BY_ROLE: Record<string, string> = {
   admin: "/admin/dashboard",
 };
 
-export function resolvePostLoginRedirect(user: User, role: string | null): string {
-  if (!user.emailVerified) return "/verify-email";
+export function resolvePostLoginRedirect(role: string | null): string {
   if (role && DASHBOARD_BY_ROLE[role]) return DASHBOARD_BY_ROLE[role];
   return "/forbidden";
 }

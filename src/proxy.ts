@@ -9,7 +9,6 @@ const publicPaths = new Set([
   "/admin/login",
   "/register",
   "/forgot-password",
-  "/verify-email",
   "/privacy-policy",
   "/terms-of-service",
   "/forbidden",
@@ -30,7 +29,6 @@ const JWKS = createRemoteJWKSet(
 type SessionClaims = {
   sub?: string;
   exp?: number;
-  email_verified?: boolean;
 };
 
 function decodeUnverified(token: string): SessionClaims | null {
@@ -98,10 +96,6 @@ export async function proxy(request: NextRequest) {
     const response = NextResponse.redirect(loginUrl);
     response.cookies.delete("__session");
     return response;
-  }
-
-  if (!claims.email_verified) {
-    return NextResponse.redirect(new URL("/verify-email", request.url));
   }
 
   const gate = roleGateFor(pathname);
