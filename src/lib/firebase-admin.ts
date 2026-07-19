@@ -16,13 +16,20 @@ function buildApp(): App {
     return initializeApp({ projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID });
   }
 
-  const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  // Accepts either naming scheme: FIREBASE_ADMIN_* (this repo's convention)
+  // or the bare service-account field names (project_id/client_email/
+  // private_key), which is how these are already configured in Vercel.
+  const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID || process.env.project_id;
+  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL || process.env.client_email;
+  const privateKey = (process.env.FIREBASE_ADMIN_PRIVATE_KEY || process.env.private_key)?.replace(
+    /\\n/g,
+    "\n"
+  );
 
   if (!projectId || !clientEmail || !privateKey) {
     throw new Error(
-      "Missing FIREBASE_ADMIN_PROJECT_ID / FIREBASE_ADMIN_CLIENT_EMAIL / FIREBASE_ADMIN_PRIVATE_KEY"
+      "Missing Firebase Admin credentials (FIREBASE_ADMIN_PROJECT_ID/CLIENT_EMAIL/PRIVATE_KEY " +
+        "or project_id/client_email/private_key)"
     );
   }
 
