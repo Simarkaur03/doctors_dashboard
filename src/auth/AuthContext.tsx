@@ -57,8 +57,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch {
           firestoreRole = null;
         }
-        setRole(firestoreRole);
-
         if (firestoreRole) {
           const syncKey = `${u.uid}:${firestoreRole}`;
           if (lastSyncedRef.current !== syncKey) {
@@ -73,6 +71,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }
         }
+
+        // Exposed only now, after the __role cookie sync above has settled:
+        // pages redirect to role-gated routes (/admin, /doctor) the instant
+        // `role` becomes non-null, and middleware checks that same cookie on
+        // the very next navigation. Setting it earlier lets that redirect
+        // race ahead of the cookie write and bounce a legitimate user to
+        // /forbidden right after login.
+        setRole(firestoreRole);
       } else {
         lastSyncedRef.current = null;
         clearSessionCookie();

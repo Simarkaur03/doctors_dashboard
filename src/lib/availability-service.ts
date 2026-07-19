@@ -11,6 +11,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { toLocalDateString } from "./date-utils";
 
 export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 export type Weekday = (typeof WEEKDAYS)[number];
@@ -80,7 +81,7 @@ export async function generateUpcomingSlots(
   for (let offset = 0; offset < daysAhead; offset += 1) {
     const date = new Date(now);
     date.setDate(date.getDate() + offset);
-    const dateStr = date.toISOString().slice(0, 10);
+    const dateStr = toLocalDateString(date);
     const weekday = dayIndexToWeekday[date.getDay()];
     const dayConfig = availability[weekday];
     if (!dayConfig.enabled) continue;

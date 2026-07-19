@@ -23,9 +23,10 @@ import {
   setSlotBlocked,
 } from "../../../lib/availability-service";
 import type { Slot } from "../../../lib/firestore-schema";
+import { toLocalDateString } from "../../../lib/date-utils";
 
 function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  return toLocalDateString();
 }
 
 export default function DoctorAvailabilityPage() {

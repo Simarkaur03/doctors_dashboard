@@ -14,9 +14,10 @@ import SlotCard from "../../../components/SlotCard";
 import { bookAppointment } from "../../../lib/booking-service";
 import { toast } from "../../../lib/toast";
 import type { Slot } from "../../../lib/firestore-schema";
+import { toLocalDateString } from "../../../lib/date-utils";
 
 function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  return toLocalDateString();
 }
 
 export default function PatientBookPage() {

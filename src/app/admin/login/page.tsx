@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../../auth/AuthContext";
 import { login, fetchUserRole } from "../../../auth/firebaseAuth";
 import { mapAuthError } from "../../../auth/loginErrors";
+import { syncSession } from "../../../lib/adminApi";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
 import { Logo } from "../../../components/ui/Logo";
@@ -46,9 +47,14 @@ export default function AdminLoginPage() {
         return;
       }
       const signedInRole = await fetchUserRole(signedInUser.uid);
-      if (signedInRole === "admin") router.replace("/admin/dashboard");
-      else if (signedInRole === "doctor") router.replace("/doctor/dashboard");
-      else {
+      if (signedInRole === "admin" || signedInRole === "doctor") {
+        // Middleware gates /admin and /doctor on the __role cookie, set by
+        // this call — without awaiting it, the redirect below can race
+        // ahead of the cookie write and bounce a legitimate staff member
+        // to /forbidden right after login.
+        await syncSession().catch(() => {});
+        router.replace(signedInRole === "admin" ? "/admin/dashboard" : "/doctor/dashboard");
+      } else {
         await logout();
         setError("This login is for staff accounts only.");
       }

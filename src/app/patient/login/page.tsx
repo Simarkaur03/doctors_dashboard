@@ -20,7 +20,7 @@ export default function PatientLoginPage() {
 }
 
 function PatientLoginContent() {
-  const { login, user, role } = useAuth();
+  const { login, user, role, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -30,8 +30,14 @@ function PatientLoginContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Wait for AuthContext to finish resolving role — otherwise an already
+    // signed-in user briefly has `role: null` (reset at the top of every
+    // auth-state change, before Firestore/role-cookie sync lands) and gets
+    // bounced to /forbidden by resolvePostLoginRedirect before the real
+    // role is known.
+    if (authLoading) return;
     if (user) router.replace(resolvePostLoginRedirect(user, role));
-  }, [user, role, router]);
+  }, [authLoading, user, role, router]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();

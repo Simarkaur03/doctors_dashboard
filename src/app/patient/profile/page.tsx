@@ -10,6 +10,7 @@ import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
 import { fetchUserProfile, saveUserProfile } from "../../../lib/patient";
 import { toast } from "../../../lib/toast";
+import { toLocalDateString } from "../../../lib/date-utils";
 
 export default function PatientProfilePage() {
   const { user, logout } = useAuth();
@@ -100,7 +101,7 @@ export default function PatientProfilePage() {
                   type="date"
                   value={dateOfBirth}
                   onChange={(event) => setDateOfBirth(event.target.value)}
-                  max={new Date().toISOString().slice(0, 10)}
+                  max={toLocalDateString()}
                 />
                 <Button type="submit" className="w-full" disabled={saving}>
                   {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
