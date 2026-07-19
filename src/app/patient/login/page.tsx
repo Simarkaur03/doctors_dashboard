@@ -4,12 +4,14 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { User } from "firebase/auth";
 import { useAuth } from "../../../auth/AuthContext";
-import { fetchUserRole } from "../../../auth/firebaseAuth";
+import { fetchUserRole, ensurePatientProfile, getGoogleRedirectResult } from "../../../auth/firebaseAuth";
 import { mapAuthError, resolvePostLoginRedirect, sanitizeRedirectParam } from "../../../auth/loginErrors";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
 import { Logo } from "../../../components/ui/Logo";
+import { GoogleIcon } from "../../../components/ui/GoogleIcon";
 
 export default function PatientLoginPage() {
   return (
@@ -20,13 +22,14 @@ export default function PatientLoginPage() {
 }
 
 function PatientLoginContent() {
-  const { login, user, role, loading: authLoading } = useAuth();
+  const { login, loginWithGoogle, user, role, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,6 +41,35 @@ function PatientLoginContent() {
     if (authLoading) return;
     if (user) router.replace(resolvePostLoginRedirect(role));
   }, [authLoading, user, role, router]);
+
+  const completeGoogleSignIn = async (signedInUser: User) => {
+    await ensurePatientProfile(signedInUser);
+    const signedInRole = await fetchUserRole(signedInUser.uid);
+    const redirect = sanitizeRedirectParam(searchParams.get("redirect"));
+    if (signedInRole === "patient" && redirect) {
+      router.replace(redirect);
+    } else {
+      router.replace(resolvePostLoginRedirect(signedInRole));
+    }
+  };
+
+  useEffect(() => {
+    // Resolves a signInWithRedirect() Google sign-in on mobile, where the
+    // browser navigates away and back instead of returning from a popup.
+    let cancelled = false;
+    getGoogleRedirectResult()
+      .then((redirectUser) => {
+        if (!redirectUser || cancelled) return;
+        return completeGoogleSignIn(redirectUser);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(mapAuthError(err));
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -60,6 +92,22 @@ function PatientLoginContent() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const signedInUser = await loginWithGoogle();
+      if (signedInUser) {
+        await completeGoogleSignIn(signedInUser);
+      }
+      // else: redirect flow navigated away; the effect above picks up the result on return.
+    } catch (err) {
+      setError(mapAuthError(err));
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#FFF3D5] px-4">
       <section className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-md">
@@ -77,11 +125,22 @@ function PatientLoginContent() {
 
           {error ? <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full" disabled={loading || googleLoading}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             Patient Login
           </Button>
         </form>
+
+        <div className="my-4 flex items-center gap-3">
+          <div className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs font-medium uppercase text-slate-400">or</span>
+          <div className="h-px flex-1 bg-slate-200" />
+        </div>
+
+        <Button type="button" variant="secondary" className="w-full" disabled={loading || googleLoading} onClick={handleGoogleSignIn}>
+          {googleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
+          Continue with Google
+        </Button>
 
         <div className="mt-4 flex items-center justify-between text-sm">
           <Link href="/forgot-password" className="rounded-lg font-medium text-[#4D694E] transition duration-150 hover:text-[#3c5140] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4D694E] focus-visible:ring-offset-2">Forgot Password</Link>

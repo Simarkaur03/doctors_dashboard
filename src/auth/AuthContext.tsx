@@ -19,6 +19,7 @@ type AuthContextValue = {
   role: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
+  loginWithGoogle: () => Promise<User | null>;
   register: (email: string, password: string, name: string) => Promise<User>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -88,6 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     role,
     loading,
     login: (email, password) => firebaseAuth.login(email, password),
+    loginWithGoogle: () => firebaseAuth.signInWithGoogle(),
     register: (email, password, name) => firebaseAuth.register(email, password, name),
     logout: () => firebaseAuth.logout(),
     resetPassword: (email) => firebaseAuth.resetPassword(email),

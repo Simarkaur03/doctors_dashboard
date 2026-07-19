@@ -13,6 +13,10 @@ const ERROR_MESSAGES: Record<string, string> = {
   "auth/network-request-failed": "Network error. Check your connection and try again.",
   "auth/email-already-in-use": "An account with this email already exists.",
   "auth/weak-password": "Choose a stronger password (at least 6 characters).",
+  "auth/popup-closed-by-user": "Sign-in was cancelled.",
+  "auth/cancelled-popup-request": "Sign-in was cancelled.",
+  "auth/popup-blocked": "Your browser blocked the sign-in popup. Please allow popups and try again.",
+  "auth/account-exists-with-different-credential": "An account already exists with this email using a different sign-in method.",
   // Our own Next.js API routes (src/app/api/auth/*) return these same
   // codes in their JSON body instead of Cloud Functions callable errors.
   "already-exists": "An account with this email already exists.",
