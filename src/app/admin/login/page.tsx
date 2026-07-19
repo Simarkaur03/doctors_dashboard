@@ -6,6 +6,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../../auth/AuthContext";
 import { login, fetchUserRole } from "../../../auth/firebaseAuth";
+import { mapAuthError } from "../../../auth/loginErrors";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
 import { Logo } from "../../../components/ui/Logo";
@@ -13,7 +14,7 @@ import { Logo } from "../../../components/ui/Logo";
 type StaffRole = "doctor" | "admin";
 
 export default function AdminLoginPage() {
-  const { logout, user, role } = useAuth();
+  const { logout, user, role, emailVerified } = useAuth();
   const router = useRouter();
   const [staffRole, setStaffRole] = useState<StaffRole>("doctor");
   const [email, setEmail] = useState("");
@@ -23,9 +24,15 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && role === "admin") router.replace("/admin/dashboard");
-    else if (user && role === "doctor") router.replace("/doctor/dashboard");
-  }, [user, role, router]);
+    if (!user) return;
+    if (!emailVerified) {
+      router.replace("/verify-email");
+    } else if (role === "admin") {
+      router.replace("/admin/dashboard");
+    } else if (role === "doctor") {
+      router.replace("/doctor/dashboard");
+    }
+  }, [user, role, emailVerified, router]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -34,6 +41,10 @@ export default function AdminLoginPage() {
 
     try {
       const signedInUser = await login(email.trim(), password);
+      if (!signedInUser.emailVerified) {
+        router.replace("/verify-email");
+        return;
+      }
       const signedInRole = await fetchUserRole(signedInUser.uid);
       if (signedInRole === "admin") router.replace("/admin/dashboard");
       else if (signedInRole === "doctor") router.replace("/doctor/dashboard");
@@ -41,8 +52,8 @@ export default function AdminLoginPage() {
         await logout();
         setError("This login is for staff accounts only.");
       }
-    } catch {
-      setError("Incorrect email or password.");
+    } catch (err) {
+      setError(mapAuthError(err));
     } finally {
       setLoading(false);
     }

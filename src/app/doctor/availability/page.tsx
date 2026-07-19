@@ -1,10 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { Loader2, Trash2, Ban, CheckCircle2, CalendarClock } from "lucide-react";
+import { Loader2, Trash2, Ban, CheckCircle2 } from "lucide-react";
 import { db } from "../../../lib/firebase";
 import { useAuth } from "../../../auth/AuthContext";
 import { AuthGuard } from "../../../components/providers/AuthGuard";
@@ -12,11 +11,6 @@ import { Card } from "../../../components/ui/Card";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
 import { toast } from "../../../lib/toast";
-import {
-  getGoogleCalendarStatus,
-  startGoogleCalendarConnect,
-  disconnectGoogleCalendar,
-} from "../../../lib/google-calendar-service";
 import {
   WEEKDAYS,
   type RecurringAvailability,
@@ -35,17 +29,7 @@ function todayISO() {
 }
 
 export default function DoctorAvailabilityPage() {
-  return (
-    <Suspense>
-      <DoctorAvailabilityContent />
-    </Suspense>
-  );
-}
-
-function DoctorAvailabilityContent() {
   const { user } = useAuth();
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const [doctorName, setDoctorName] = useState("Doctor");
   const [recurring, setRecurring] = useState<Record<Weekday, RecurringAvailability> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,11 +42,6 @@ function DoctorAvailabilityContent() {
   const [newDuration, setNewDuration] = useState(30);
   const [addingSlot, setAddingSlot] = useState(false);
 
-  const [calendarConnected, setCalendarConnected] = useState(false);
-  const [calendarConfigured, setCalendarConfigured] = useState(true);
-  const [calendarLoading, setCalendarLoading] = useState(true);
-  const [calendarBusy, setCalendarBusy] = useState(false);
-
   useEffect(() => {
     if (!user?.uid) return;
     getDoc(doc(db, "users", user.uid)).then((snap) => {
@@ -72,52 +51,6 @@ function DoctorAvailabilityContent() {
       .then(setRecurring)
       .finally(() => setLoading(false));
   }, [user]);
-
-  useEffect(() => {
-    const calendarParam = searchParams.get("calendar");
-    if (calendarParam === "connected") {
-      toast.success("Google Calendar connected.");
-      router.replace("/doctor/availability");
-    } else if (calendarParam === "error") {
-      toast.error("Could not connect Google Calendar. Please try again.");
-      router.replace("/doctor/availability");
-    }
-  }, [searchParams, router]);
-
-  useEffect(() => {
-    if (!user?.uid) return;
-    getGoogleCalendarStatus()
-      .then((status) => {
-        setCalendarConnected(status.connected);
-        setCalendarConfigured(status.configured);
-      })
-      .catch(() => setCalendarConfigured(false))
-      .finally(() => setCalendarLoading(false));
-  }, [user]);
-
-  const handleConnectCalendar = async () => {
-    setCalendarBusy(true);
-    try {
-      const authUrl = await startGoogleCalendarConnect();
-      window.location.href = authUrl;
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not start Google Calendar connection.");
-      setCalendarBusy(false);
-    }
-  };
-
-  const handleDisconnectCalendar = async () => {
-    setCalendarBusy(true);
-    try {
-      await disconnectGoogleCalendar();
-      setCalendarConnected(false);
-      toast.success("Google Calendar disconnected.");
-    } catch {
-      toast.error("Could not disconnect Google Calendar.");
-    } finally {
-      setCalendarBusy(false);
-    }
-  };
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -213,26 +146,6 @@ function DoctorAvailabilityContent() {
       <main className="bg-[#FFF3D5] p-4 md:p-6">
         <div className="mx-auto max-w-5xl space-y-4">
           <h1 className="text-xl font-semibold text-slate-900">Availability</h1>
-
-          {!calendarLoading && calendarConfigured ? (
-            <Card>
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                  <CalendarClock className="h-4 w-4 text-[#4D694E]" />
-                  {calendarConnected ? "Google Calendar connected" : "Google Calendar"}
-                </div>
-                {calendarConnected ? (
-                  <Button size="sm" variant="secondary" onClick={handleDisconnectCalendar} disabled={calendarBusy}>
-                    {calendarBusy ? "Working…" : "Disconnect"}
-                  </Button>
-                ) : (
-                  <Button size="sm" onClick={handleConnectCalendar} disabled={calendarBusy}>
-                    {calendarBusy ? "Redirecting…" : "Connect"}
-                  </Button>
-                )}
-              </div>
-            </Card>
-          ) : null}
 
           <Card>
             <h2 className="text-base font-semibold text-slate-900">Weekly Hours</h2>

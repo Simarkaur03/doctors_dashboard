@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../auth/AuthContext";
+import { mapAuthError } from "../../auth/loginErrors";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
 import { Logo } from "../../components/ui/Logo";
@@ -25,9 +26,9 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register(email.trim(), password, name.trim());
-      router.replace("/patient/dashboard");
-    } catch {
-      setError("Could not create your account.");
+      router.replace("/verify-email");
+    } catch (err) {
+      setError(mapAuthError(err));
     } finally {
       setLoading(false);
     }

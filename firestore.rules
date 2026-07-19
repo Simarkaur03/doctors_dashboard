@@ -17,12 +17,10 @@ service cloud.firestore {
     }
 
     function role() {
-      // request.auth.token.role throws if the custom claim was never set
-      // (true for every user in this app, since nothing sets custom claims),
-      // so it must be read with get(), not dot-notation.
-      return request.auth.token.get('role', null) != null
-        ? request.auth.token.get('role', null)
-        : userRole();
+      // No Firebase custom claims on the Spark plan (there's no Cloud
+      // Function to set them) — Firestore's users/{uid}.role is the sole
+      // source of truth.
+      return userRole();
     }
 
     function isDoctor() {
@@ -193,11 +191,6 @@ service cloud.firestore {
     }
 
     match /auditLogs/{logId} {
-      allow read, write: if false;
-    }
-
-    // calendarSettings holds Google OAuth tokens; only Cloud Functions (Admin SDK) may read/write it.
-    match /calendarSettings/{settingId} {
       allow read, write: if false;
     }
 

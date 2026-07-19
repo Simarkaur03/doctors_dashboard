@@ -2,6 +2,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  sendEmailVerification,
   signOut,
   setPersistence,
   browserLocalPersistence,
@@ -22,7 +23,13 @@ export async function register(email: string, password: string, name: string) {
     active: true,
   };
   await setDoc(doc(db, "users", user.uid), userDoc);
+  await sendEmailVerification(user);
   return user;
+}
+
+export async function resendVerification() {
+  if (!auth.currentUser) throw new Error("Not signed in");
+  return sendEmailVerification(auth.currentUser);
 }
 
 export async function login(email: string, password: string) {

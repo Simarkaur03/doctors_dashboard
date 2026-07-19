@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../../auth/AuthContext";
+import { fetchUserRole } from "../../../auth/firebaseAuth";
+import { mapAuthError, resolvePostLoginRedirect, sanitizeRedirectParam } from "../../../auth/loginErrors";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
 import { Logo } from "../../../components/ui/Logo";
@@ -28,7 +30,7 @@ function PatientLoginContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user && role === "patient") router.replace("/patient/dashboard");
+    if (user) router.replace(resolvePostLoginRedirect(user, role));
   }, [user, role, router]);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -37,10 +39,16 @@ function PatientLoginContent() {
     setLoading(true);
 
     try {
-      await login(email.trim(), password);
-      router.replace(searchParams.get("redirect") || "/patient/dashboard");
-    } catch {
-      setError("Incorrect email or password.");
+      const signedInUser = await login(email.trim(), password);
+      const signedInRole = await fetchUserRole(signedInUser.uid);
+      const redirect = sanitizeRedirectParam(searchParams.get("redirect"));
+      if (signedInUser.emailVerified && signedInRole === "patient" && redirect) {
+        router.replace(redirect);
+      } else {
+        router.replace(resolvePostLoginRedirect(signedInUser, signedInRole));
+      }
+    } catch (err) {
+      setError(mapAuthError(err));
     } finally {
       setLoading(false);
     }
