@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import * as crypto from "crypto";
+import * as Sentry from "@sentry/nextjs";
 import { adminAuth, adminDb } from "../../../../lib/firebase-admin";
 
 /**
@@ -20,7 +21,9 @@ export async function POST(request: NextRequest) {
   try {
     const decoded = await adminAuth().verifyIdToken(idToken);
     callerUid = decoded.uid;
-  } catch {
+  } catch (err) {
+    console.error("[create-doctor] verifyIdToken failed:", err);
+    Sentry.captureException(err, { tags: { route: "create-doctor" } });
     return NextResponse.json({ code: "unauthenticated", message: "Invalid or expired session" }, { status: 401 });
   }
 

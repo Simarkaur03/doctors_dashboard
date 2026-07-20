@@ -78,6 +78,13 @@ function PatientLoginContent() {
 
     try {
       const signedInUser = await login(email.trim(), password);
+      // Self-heals accounts that have a Firebase Auth user but no
+      // users/{uid} Firestore doc yet (e.g. pre-existing accounts from
+      // before this schema, or a signup whose doc write never landed) —
+      // without this, fetchUserRole below returns null and
+      // resolvePostLoginRedirect bounces a valid, freshly-authenticated
+      // user straight to /forbidden.
+      await ensurePatientProfile(signedInUser);
       const signedInRole = await fetchUserRole(signedInUser.uid);
       const redirect = sanitizeRedirectParam(searchParams.get("redirect"));
       if (signedInRole === "patient" && redirect) {

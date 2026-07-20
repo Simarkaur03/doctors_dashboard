@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { adminAuth, adminDb } from "../../../../lib/firebase-admin";
 import { signRoleToken, ROLE_COOKIE_NAME } from "../../../../lib/roleToken";
 
@@ -16,7 +17,14 @@ export async function POST(request: NextRequest) {
   try {
     const decoded = await adminAuth().verifyIdToken(idToken);
     uid = decoded.uid;
-  } catch {
+  } catch (err) {
+    // The client's token was valid enough to reach here — a failure at this
+    // step is almost always the Admin SDK itself (missing/invalid
+    // FIREBASE_ADMIN_* credentials), not the user's session. Logging the
+    // real cause is the only way to tell those apart; the 401 response stays
+    // generic since the client shouldn't see server credential details.
+    console.error("[sync-session] verifyIdToken failed:", err);
+    Sentry.captureException(err, { tags: { route: "sync-session" } });
     return NextResponse.json({ code: "unauthenticated", message: "Invalid or expired session" }, { status: 401 });
   }
 

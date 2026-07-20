@@ -33,6 +33,18 @@ export function mapAuthError(error: unknown): string {
   if (error instanceof ApiError && error.code && ERROR_MESSAGES[error.code]) {
     return ERROR_MESSAGES[error.code];
   }
+  // Unmapped errors surface their real code/message instead of a generic
+  // "Something went wrong" so a broken step (e.g. a server misconfiguration)
+  // is diagnosable from the login screen instead of hidden.
+  if (error instanceof FirebaseError) {
+    return `Something went wrong (${error.code}). Please try again.`;
+  }
+  if (error instanceof ApiError) {
+    return error.code ? `Something went wrong (${error.code}). Please try again.` : error.message;
+  }
+  if (error instanceof Error && error.message) {
+    return `Something went wrong: ${error.message}`;
+  }
   return "Something went wrong. Please try again.";
 }
 

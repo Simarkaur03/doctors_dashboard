@@ -38,6 +38,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const unsub = onIdTokenChanged(auth, async (u) => {
+      // Re-arm `loading` for every auth transition, not just the initial
+      // mount — `useState(true)` only covers the first call. Without this,
+      // signing in from an already-mounted page (loading already false from
+      // the initial signed-out check) leaves consumers seeing
+      // `{loading: false, user, role: null}` for the entire Firestore/
+      // sync-session round trip and bounces a valid user to /forbidden.
+      setLoading(true);
       setUser(u);
       setRole(null);
       if (u) {
