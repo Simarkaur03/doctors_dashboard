@@ -4,6 +4,17 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../auth/AuthContext";
 
+// Admin is a superset of doctor everywhere else in the app (proxy.ts's
+// /doctor role gate and doctor/layout.tsx both already allow "admin"), so
+// this guard must agree — otherwise an admin who passes those checks still
+// gets bounced back to /admin/dashboard the moment a doctor page's own
+// <AuthGuard requiredRole="doctor"> re-checks the exact role.
+function satisfiesRole(role: string | null, requiredRole: "patient" | "doctor" | "admin") {
+  if (role === requiredRole) return true;
+  if (requiredRole === "doctor" && role === "admin") return true;
+  return false;
+}
+
 export function AuthGuard({
   children,
   requiredRole,
@@ -20,7 +31,7 @@ export function AuthGuard({
       router.replace("/patient/login");
       return;
     }
-    if (requiredRole && role !== requiredRole) {
+    if (requiredRole && !satisfiesRole(role, requiredRole)) {
       if (role === "admin") router.replace("/admin/dashboard");
       else if (role === "doctor") router.replace("/doctor/dashboard");
       else if (role === "patient") router.replace("/patient/dashboard");
@@ -37,7 +48,7 @@ export function AuthGuard({
   }
 
   if (!user) return null;
-  if (requiredRole && role !== requiredRole) return null;
+  if (requiredRole && !satisfiesRole(role, requiredRole)) return null;
 
   return <>{children}</>;
 }
