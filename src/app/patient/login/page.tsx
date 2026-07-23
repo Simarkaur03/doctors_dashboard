@@ -8,6 +8,7 @@ import { User } from "firebase/auth";
 import { useAuth } from "../../../auth/AuthContext";
 import { fetchUserRole, ensurePatientProfile, getGoogleRedirectResult } from "../../../auth/firebaseAuth";
 import { mapAuthError, resolvePostLoginRedirect, sanitizeRedirectParam } from "../../../auth/loginErrors";
+import { syncSession } from "../../../lib/adminApi";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
 import { Logo } from "../../../components/ui/Logo";
@@ -42,15 +43,28 @@ function PatientLoginContent() {
     if (user) router.replace(resolvePostLoginRedirect(role));
   }, [authLoading, user, role, router]);
 
-  const completeGoogleSignIn = async (signedInUser: User) => {
-    await ensurePatientProfile(signedInUser);
-    const signedInRole = await fetchUserRole(signedInUser.uid);
+  // This form is patient-branded, but any role can land here (e.g. a
+  // staff account signing in from the wrong page). /patient/* tolerates an
+  // unsynced __role cookie, so a plain patient redirect doesn't need to
+  // wait — but /admin and /doctor don't, so a non-patient role must sync
+  // the cookie first or the redirect races ahead of it and bounces the
+  // user to /forbidden (mirrors the same guard in admin/login/page.tsx).
+  const redirectAfterLogin = async (signedInRole: string | null) => {
     const redirect = sanitizeRedirectParam(searchParams.get("redirect"));
     if (signedInRole === "patient" && redirect) {
       router.replace(redirect);
-    } else {
-      router.replace(resolvePostLoginRedirect(signedInRole));
+      return;
     }
+    if (signedInRole !== "patient") {
+      await syncSession().catch(() => {});
+    }
+    router.replace(resolvePostLoginRedirect(signedInRole));
+  };
+
+  const completeGoogleSignIn = async (signedInUser: User) => {
+    await ensurePatientProfile(signedInUser);
+    const signedInRole = await fetchUserRole(signedInUser.uid);
+    await redirectAfterLogin(signedInRole);
   };
 
   useEffect(() => {
@@ -86,12 +100,7 @@ function PatientLoginContent() {
       // user straight to /forbidden.
       await ensurePatientProfile(signedInUser);
       const signedInRole = await fetchUserRole(signedInUser.uid);
-      const redirect = sanitizeRedirectParam(searchParams.get("redirect"));
-      if (signedInRole === "patient" && redirect) {
-        router.replace(redirect);
-      } else {
-        router.replace(resolvePostLoginRedirect(signedInRole));
-      }
+      await redirectAfterLogin(signedInRole);
     } catch (err) {
       setError(mapAuthError(err));
     } finally {
