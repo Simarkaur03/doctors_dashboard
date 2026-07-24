@@ -47,46 +47,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       setUser(u);
       setRole(null);
-      if (u) {
-        const token = await u.getIdToken();
-        setSessionCookie(token);
-        let firestoreRole: string | null = null;
-        try {
-          const snap = await getDoc(doc(db, "users", u.uid));
-          if (snap.exists()) {
-            const data = snap.data();
-            firestoreRole = (data && (data.role as string)) || null;
+      // try/finally guarantees `loading` always resolves — otherwise a
+      // rejected getIdToken()/getDoc() (e.g. a network blip) would leave the
+      // app stuck on the loading spinner forever.
+      try {
+        if (u) {
+          let token: string | null = null;
+          try {
+            token = await u.getIdToken();
+          } catch {
+            token = null;
           }
-        } catch {
-          firestoreRole = null;
-        }
-        if (firestoreRole) {
-          const syncKey = `${u.uid}:${firestoreRole}`;
-          if (lastSyncedRef.current !== syncKey) {
-            lastSyncedRef.current = syncKey;
-            try {
-              await syncSession();
-            } catch {
-              // Non-fatal: the user still functions with Firestore-sourced
-              // role for client-side UI; edge role-gating just won't see
-              // it until the next successful sync attempt.
-              lastSyncedRef.current = null;
+          if (token) setSessionCookie(token);
+          let firestoreRole: string | null = null;
+          try {
+            const snap = await getDoc(doc(db, "users", u.uid));
+            if (snap.exists()) {
+              const data = snap.data();
+              firestoreRole = (data && (data.role as string)) || null;
+            }
+          } catch {
+            firestoreRole = null;
+          }
+          if (firestoreRole) {
+            const syncKey = `${u.uid}:${firestoreRole}`;
+            if (lastSyncedRef.current !== syncKey) {
+              lastSyncedRef.current = syncKey;
+              try {
+                await syncSession();
+              } catch {
+                // Non-fatal: the user still functions with Firestore-sourced
+                // role for client-side UI; edge role-gating just won't see
+                // it until the next successful sync attempt.
+                lastSyncedRef.current = null;
+              }
             }
           }
-        }
 
-        // Exposed only now, after the __role cookie sync above has settled:
-        // pages redirect to role-gated routes (/admin, /doctor) the instant
-        // `role` becomes non-null, and middleware checks that same cookie on
-        // the very next navigation. Setting it earlier lets that redirect
-        // race ahead of the cookie write and bounce a legitimate user to
-        // /forbidden right after login.
-        setRole(firestoreRole);
-      } else {
-        lastSyncedRef.current = null;
-        clearSessionCookie();
+          // Exposed only now, after the __role cookie sync above has settled:
+          // pages redirect to role-gated routes (/admin, /doctor) the instant
+          // `role` becomes non-null, and middleware checks that same cookie on
+          // the very next navigation. Setting it earlier lets that redirect
+          // race ahead of the cookie write and bounce a legitimate user to
+          // /forbidden right after login.
+          setRole(firestoreRole);
+        } else {
+          lastSyncedRef.current = null;
+          clearSessionCookie();
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsub();
   }, []);

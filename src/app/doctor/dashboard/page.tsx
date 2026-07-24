@@ -48,7 +48,7 @@ export default function DoctorDashboardPage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-accent p-4 md:p-6">
         <div className="mx-auto flex max-w-6xl flex-col gap-4">
           <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
 
@@ -67,7 +67,7 @@ export default function DoctorDashboardPage() {
                       <p className="text-sm text-slate-500">{item.label}</p>
                       <p className="mt-1 text-2xl font-semibold text-slate-900">{item.value}</p>
                     </div>
-                    <Icon className="h-5 w-5 text-[#4D694E]" />
+                    <Icon className="h-5 w-5 text-primary" />
                   </div>
                 </Card>
               );
@@ -87,10 +87,10 @@ export default function DoctorDashboardPage() {
               ) : (
                 <div className="space-y-2">
                   {appointments.map((appointment) => (
-                    <div key={appointment.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-3">
-                      <div>
-                        <p className="font-semibold text-slate-900">{appointment.patientName}</p>
-                        <p className="text-sm text-slate-500">{appointment.date} • {appointment.time}</p>
+                    <div key={appointment.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-slate-900">{appointment.patientName}</p>
+                        <p className="truncate text-sm text-slate-500">{appointment.date} • {appointment.time}</p>
                       </div>
                       <Badge>{appointment.status}</Badge>
                     </div>

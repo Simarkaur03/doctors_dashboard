@@ -7,18 +7,18 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen bg-[#FFF3D5] px-4 py-12">
+    <main className="min-h-screen bg-accent px-4 py-12">
       <div className="mx-auto max-w-3xl space-y-3">
         <BackLink href="/" label="Back to home" />
       <div className="rounded-[32px] bg-white p-8 shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)] md:p-12">
-        <h1 className="text-3xl font-semibold text-[#24302A]">Privacy Policy</h1>
-        <p className="mt-2 text-sm text-[#66736D]">
+        <h1 className="text-3xl font-semibold text-slate-900">Privacy Policy</h1>
+        <p className="mt-2 text-sm text-slate-500">
           Last updated: July 2, 2026
         </p>
 
-        <div className="mt-8 space-y-6 text-sm leading-relaxed text-[#3A4A40]">
+        <div className="mt-8 space-y-6 text-sm leading-relaxed text-slate-700">
           <section>
-            <h2 className="text-lg font-semibold text-[#24302A]">
+            <h2 className="text-lg font-semibold text-slate-900">
               1. Information We Collect
             </h2>
             <p className="mt-2">
@@ -30,7 +30,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#24302A]">
+            <h2 className="text-lg font-semibold text-slate-900">
               2. How We Use Your Information
             </h2>
             <p className="mt-2">
@@ -41,7 +41,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#24302A]">
+            <h2 className="text-lg font-semibold text-slate-900">
               3. Data Storage & Security
             </h2>
             <p className="mt-2">
@@ -53,7 +53,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#24302A]">
+            <h2 className="text-lg font-semibold text-slate-900">
               4. Data Sharing
             </h2>
             <p className="mt-2">
@@ -64,7 +64,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#24302A]">
+            <h2 className="text-lg font-semibold text-slate-900">
               5. Your Rights
             </h2>
             <p className="mt-2">
@@ -75,14 +75,14 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-[#24302A]">
+            <h2 className="text-lg font-semibold text-slate-900">
               6. Contact
             </h2>
             <p className="mt-2">
               For privacy-related inquiries, contact us at{" "}
               <a
                 href="mailto:privacy@doctordashboard.com"
-                className="text-[#4D694E] underline"
+                className="text-primary underline"
               >
                 privacy@doctordashboard.com
               </a>

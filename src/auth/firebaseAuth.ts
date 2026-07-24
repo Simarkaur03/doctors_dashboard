@@ -43,6 +43,15 @@ export async function login(email: string, password: string) {
 }
 
 export async function logout() {
+  // Clear the server-set __role (and __session) cookies first; signOut then
+  // tears down the Firebase session and the AuthContext listener clears the
+  // client __session cookie. Best-effort: a stale __role cookie is inert once
+  // the session is gone (middleware requires __role.sub === session uid).
+  try {
+    await fetch("/api/auth/logout", { method: "POST" });
+  } catch {
+    // ignore network errors during logout
+  }
   await signOut(auth);
 }
 

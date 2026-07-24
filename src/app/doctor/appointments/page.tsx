@@ -63,7 +63,7 @@ export default function DoctorAppointmentsPage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-accent p-4 md:p-6">
         <div className="mx-auto max-w-5xl space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h1 className="text-xl font-semibold text-slate-900">Appointments</h1>
@@ -73,7 +73,7 @@ export default function DoctorAppointmentsPage() {
                   key={option}
                   onClick={() => setFilter(option)}
                   className={`rounded-full px-3 py-1.5 text-sm font-semibold capitalize transition ${
-                    filter === option ? "bg-[#4D694E] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    filter === option ? "bg-primary text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
                 >
                   {option}
@@ -97,14 +97,14 @@ export default function DoctorAppointmentsPage() {
                     key={appointment.id}
                     className="flex flex-col gap-3 rounded-2xl border border-slate-200 p-4 md:flex-row md:items-center md:justify-between"
                   >
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-semibold text-slate-900">{appointment.patientName}</p>
                       <p className="text-sm text-slate-500">
                         {appointment.date} • {appointment.time} • {appointment.duration} min
                       </p>
-                      {appointment.reason ? <p className="mt-1 text-xs text-slate-400">Reason: {appointment.reason}</p> : null}
+                      {appointment.reason ? <p className="mt-1 text-xs text-slate-400 break-words">Reason: {appointment.reason}</p> : null}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <Badge>{appointment.status}</Badge>
                       {ACTIONABLE_STATUSES.has(appointment.status) ? (
                         <>

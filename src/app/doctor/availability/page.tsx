@@ -144,7 +144,7 @@ export default function DoctorAvailabilityPage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-accent p-4 md:p-6">
         <div className="mx-auto max-w-5xl space-y-4">
           <h1 className="text-xl font-semibold text-slate-900">Availability</h1>
 

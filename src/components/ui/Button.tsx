@@ -8,9 +8,9 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 export function Button({ className, variant = "primary", size = "md", ...props }: ButtonProps) {
   const base = "inline-flex items-center justify-center rounded-2xl font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 active:scale-[0.98]";
   const variants = {
-    primary: "bg-[#4D694E] text-white shadow-sm hover:bg-[#415b41] hover:shadow-md focus-visible:ring-[#4D694E]",
-    secondary: "bg-[#FFF3D5] text-[#4D694E] hover:bg-[#f8e8bc] hover:shadow-sm focus-visible:ring-[#4D694E]",
-    ghost: "bg-transparent text-[#4D694E] hover:bg-[#f4f5f3] focus-visible:ring-[#4D694E]",
+    primary: "bg-primary text-white shadow-sm hover:bg-primary-hover hover:shadow-md focus-visible:ring-primary",
+    secondary: "bg-accent text-primary hover:bg-accent-hover hover:shadow-sm focus-visible:ring-primary",
+    ghost: "bg-transparent text-primary hover:bg-slate-100 focus-visible:ring-primary",
   };
   const sizes = {
     sm: "h-10 px-3 text-sm",

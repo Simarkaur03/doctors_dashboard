@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { collection, onSnapshot, query } from "firebase/firestore";
-import { LogOut, Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 import { db } from "../../../lib/firebase";
 import { createDoctorAccount } from "../../../lib/adminApi";
 import { useAuth } from "../../../auth/AuthContext";
@@ -17,19 +16,13 @@ import { Input } from "../../../components/ui/Input";
 import type { Appointment } from "../../../types";
 
 export default function AdminDashboardPage() {
-  const { user, logout } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [doctorName, setDoctorName] = useState("");
   const [doctorEmail, setDoctorEmail] = useState("");
   const [invitingDoctor, setInvitingDoctor] = useState(false);
   const [inviteStatus, setInviteStatus] = useState<string | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
-
-  const handleLogout = async () => {
-    await logout();
-    router.replace("/admin/login");
-  };
 
   const handleInviteDoctor = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -60,15 +53,9 @@ export default function AdminDashboardPage() {
 
   return (
     <AuthGuard requiredRole="admin">
-      <main className="min-h-screen bg-[#FFF3D5] p-4 md:p-6">
+      <main className="min-h-screen bg-accent p-4 md:p-6">
         <div className="mx-auto max-w-5xl space-y-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
-            <Button variant="secondary" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign out
-            </Button>
-          </div>
+          <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
 
           <Card>
             <h2 className="mb-3 text-base font-semibold text-slate-900">Appointments</h2>
@@ -77,10 +64,10 @@ export default function AdminDashboardPage() {
             ) : (
               <div className="space-y-2">
                 {appointments.slice(0, 6).map((appointment) => (
-                  <div key={appointment.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-3 transition-colors duration-150 hover:bg-slate-100">
-                    <div>
-                      <p className="font-semibold text-slate-900">{appointment.patientName}</p>
-                      <p className="text-sm text-slate-500">{appointment.doctorName} • {appointment.date} • {appointment.time}</p>
+                  <div key={appointment.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3 transition-colors duration-150 hover:bg-slate-100">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-slate-900">{appointment.patientName}</p>
+                      <p className="truncate text-sm text-slate-500">{appointment.doctorName} • {appointment.date} • {appointment.time}</p>
                     </div>
                     <Badge>{appointment.status}</Badge>
                   </div>
@@ -112,7 +99,7 @@ export default function AdminDashboardPage() {
                 required
               />
               {inviteStatus ? (
-                <div className="rounded-xl bg-[#4D694E]/10 p-3 text-sm text-[#4D694E]">{inviteStatus}</div>
+                <div className="rounded-xl bg-primary/10 p-3 text-sm text-primary">{inviteStatus}</div>
               ) : null}
               {inviteError ? <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{inviteError}</div> : null}
               <Button type="submit" disabled={invitingDoctor}>

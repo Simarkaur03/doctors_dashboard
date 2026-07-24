@@ -26,7 +26,7 @@ export default function PatientNotificationsPage() {
 
   return (
     <AuthGuard requiredRole="patient">
-      <main className="bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-accent p-4 md:p-6">
         <div className="mx-auto max-w-2xl space-y-3">
           <BackLink href="/patient/dashboard" />
           <Card>

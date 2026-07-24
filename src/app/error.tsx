@@ -15,9 +15,9 @@ export default function Error({
   }, [error]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#FFF3D5] px-4">
+    <main className="flex min-h-screen items-center justify-center bg-accent px-4">
       <div className="rounded-[32px] bg-white p-8 text-center shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)]">
-        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#4D694E]">
+        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">
           Unexpected issue
         </p>
         <h1 className="mt-3 text-3xl font-semibold text-slate-900">
@@ -28,7 +28,7 @@ export default function Error({
         </p>
         <button
           onClick={reset}
-          className="mt-6 rounded-2xl bg-[#4D694E] px-4 py-3 text-sm font-semibold text-white"
+          className="mt-6 rounded-2xl bg-primary px-4 py-3 text-sm font-semibold text-white"
         >
           Try again
         </button>

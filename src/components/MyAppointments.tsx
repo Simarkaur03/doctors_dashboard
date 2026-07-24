@@ -118,7 +118,7 @@ export default function MyAppointments() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader className="h-6 w-6 text-[#6F8F7A] animate-spin" />
+        <Loader className="h-6 w-6 text-primary animate-spin" />
       </div>
     );
   }
@@ -144,21 +144,21 @@ export default function MyAppointments() {
                 key={appointment.id}
                 className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3"
               >
-                <div>
-                  <p className="font-semibold text-slate-900">{appointment.doctorName}</p>
-                  <div className="mt-1 flex items-center gap-2 text-sm text-slate-500">
-                    <Calendar className="h-3.5 w-3.5" />
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-slate-900">{appointment.doctorName}</p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
                     <span>{appointment.formattedDate}</span>
-                    <Clock className="h-3.5 w-3.5" />
+                    <Clock className="h-3.5 w-3.5 shrink-0" />
                     <span>{appointment.time}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-end gap-2">
                   <Badge>{appointment.displayStatus}</Badge>
                   {canCancelAppointment(appointment.status) && (
                     <button
                       onClick={() => handleCancelClick(appointment)}
-                      className="rounded-lg border border-[#C97B7B] px-3 py-1.5 text-sm font-semibold text-[#C97B7B] transition duration-150 hover:bg-[#F7EDEC] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C97B7B] focus-visible:ring-offset-2 disabled:opacity-50 disabled:active:scale-100"
+                      className="rounded-lg border border-red-600 px-3 py-1.5 text-sm font-semibold text-red-600 transition duration-150 hover:bg-red-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:active:scale-100"
                       disabled={cancellingId === appointment.id}
                     >
                       {cancellingId === appointment.id ? "Cancelling…" : "Cancel"}
@@ -180,9 +180,9 @@ export default function MyAppointments() {
                 key={appointment.id}
                 className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3 opacity-75"
               >
-                <div>
-                  <p className="font-semibold text-slate-900">{appointment.doctorName}</p>
-                  <p className="text-sm text-slate-500">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-slate-900">{appointment.doctorName}</p>
+                  <p className="truncate text-sm text-slate-500">
                     {appointment.formattedDate} at {appointment.time}
                   </p>
                 </div>

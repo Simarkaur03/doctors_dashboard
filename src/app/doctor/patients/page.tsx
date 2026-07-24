@@ -43,7 +43,7 @@ export default function DoctorPatientsPage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-accent p-4 md:p-6">
         <div className="mx-auto max-w-4xl space-y-4">
           <h1 className="text-xl font-semibold text-slate-900">Patients</h1>
 
@@ -53,7 +53,7 @@ export default function DoctorPatientsPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search"
-              className="w-full rounded-xl border border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-[#4D694E] focus:ring-2 focus:ring-[#4D694E]/20"
+              className="w-full rounded-xl border border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
@@ -71,14 +71,14 @@ export default function DoctorPatientsPage() {
                   <Link
                     key={patient.uid}
                     href={`/doctor/patients/${patient.uid}`}
-                    className="flex items-center gap-3 rounded-xl p-3 transition duration-150 hover:bg-slate-50 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4D694E] focus-visible:ring-offset-2"
+                    className="flex items-center gap-3 rounded-xl p-3 transition duration-150 hover:bg-slate-50 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#FFF3D5] text-[#4D694E]">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-primary">
                       <User className="h-4 w-4" />
                     </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">{patient.name}</p>
-                      <p className="text-sm text-slate-500">{patient.email}</p>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-slate-900">{patient.name}</p>
+                      <p className="truncate text-sm text-slate-500">{patient.email}</p>
                     </div>
                   </Link>
                 ))}

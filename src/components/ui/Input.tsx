@@ -11,7 +11,7 @@ export function Input({ className, label, error, ...props }: InputProps) {
       {label ? <span className="mb-2 block">{label}</span> : null}
       <input
         className={clsx(
-          "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition duration-150 hover:border-slate-300 focus:border-[#4D694E] focus:ring-2 focus:ring-[#4D694E]/20",
+          "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 shadow-sm outline-none transition duration-150 hover:border-slate-300 focus:border-primary focus:ring-2 focus:ring-primary/20",
           error ? "border-red-400 focus:border-red-500 focus:ring-red-200" : "",
           className
         )}

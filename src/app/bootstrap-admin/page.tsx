@@ -37,9 +37,9 @@ export default function BootstrapAdminPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#FFF3D5] px-4 py-16">
+    <main className="flex min-h-screen items-center justify-center bg-accent px-4 py-16">
       <Card className="w-full max-w-md text-center">
-        <div className="flex justify-center text-[#4D694E]">
+        <div className="flex justify-center text-primary">
           <ShieldCheck className="h-12 w-12" />
         </div>
         <h1 className="mt-4 text-2xl font-semibold text-slate-900">One-time admin setup</h1>
@@ -53,7 +53,7 @@ export default function BootstrapAdminPage() {
             Make {user.email} the admin
           </Button>
         </div>
-        {status ? <div className="mt-4 rounded-2xl bg-[#4D694E]/10 p-3 text-sm text-[#4D694E]">{status}</div> : null}
+        {status ? <div className="mt-4 rounded-2xl bg-primary/10 p-3 text-sm text-primary">{status}</div> : null}
         {error ? <div className="mt-4 rounded-2xl bg-red-50 p-3 text-sm text-red-600">{error}</div> : null}
       </Card>
     </main>

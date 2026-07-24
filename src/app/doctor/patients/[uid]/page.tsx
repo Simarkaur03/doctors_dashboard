@@ -57,7 +57,7 @@ export default function DoctorPatientProfilePage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="bg-[#FFF3D5] p-4 md:p-6">
+      <main className="bg-accent p-4 md:p-6">
         <div className="mx-auto max-w-4xl space-y-4">
           <BackLink href="/doctor/patients" label="Back to patients" />
 
@@ -76,17 +76,17 @@ export default function DoctorPatientProfilePage() {
             <>
               <Card>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#FFF3D5] text-[#4D694E]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-primary">
                     <UserIcon className="h-5 w-5" />
                   </div>
                   <h1 className="text-lg font-semibold text-slate-900">{profile.name}</h1>
                 </div>
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <Mail className="h-4 w-4 text-[#4D694E]" /> {profile.email || "—"}
+                  <div className="flex min-w-0 items-center gap-2 text-sm text-slate-600">
+                    <Mail className="h-4 w-4 shrink-0 text-primary" /> <span className="truncate">{profile.email || "—"}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <Phone className="h-4 w-4 text-[#4D694E]" /> {profile.phone || "—"}
+                  <div className="flex min-w-0 items-center gap-2 text-sm text-slate-600">
+                    <Phone className="h-4 w-4 shrink-0 text-primary" /> <span className="truncate">{profile.phone || "—"}</span>
                   </div>
                   {profile.dateOfBirth ? (
                     <div className="text-sm text-slate-600">DOB: {profile.dateOfBirth}</div>
@@ -103,13 +103,13 @@ export default function DoctorPatientProfilePage() {
                     {appointments.map((appointment) => (
                       <div
                         key={appointment.id}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 p-3"
+                        className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3"
                       >
-                        <div>
+                        <div className="min-w-0">
                           <p className="font-semibold text-slate-900">
                             {appointment.date} • {appointment.time}
                           </p>
-                          {appointment.reason ? <p className="text-sm text-slate-500">{appointment.reason}</p> : null}
+                          {appointment.reason ? <p className="break-words text-sm text-slate-500">{appointment.reason}</p> : null}
                         </div>
                         <Badge>{appointment.status}</Badge>
                       </div>
