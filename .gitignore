@@ -7,6 +7,11 @@ node_modules/
 out/
 build/
 
+# TypeScript incremental-compile cache: regenerated on every build, so tracking
+# it only produces churn and merge conflicts.
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
 # Environment variables (NEVER push these)
 .env
 .env.local
