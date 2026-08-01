@@ -9,6 +9,7 @@ import { Card } from "../../../components/ui/Card";
 import { Badge } from "../../../components/ui/Badge";
 import { AuthGuard } from "../../../components/providers/AuthGuard";
 import type { DashboardStats, Appointment, NotificationItem } from "../../../types";
+import { PageContainer } from "../../../components/ui/PageContainer";
 
 export default function DoctorDashboardPage() {
   const { user } = useAuth();
@@ -48,75 +49,75 @@ export default function DoctorDashboardPage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="bg-accent p-4 md:p-6">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4">
-          <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
+      <PageContainer>
+        <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
 
-          <section className="grid gap-3 md:grid-cols-4">
-            {[
-              { label: "Appointments", value: stats.appointments, icon: CalendarDays },
-              { label: "Patients", value: stats.patients, icon: Users },
-              { label: "Pending", value: stats.pending, icon: ClipboardList },
-              { label: "Completed", value: stats.completed, icon: FileText },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <Card key={item.label} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-500">{item.label}</p>
-                      <p className="mt-1 text-2xl font-semibold text-slate-900">{item.value}</p>
-                    </div>
-                    <Icon className="h-5 w-5 text-primary" />
+        {/* Steps 1 -> 2 -> 4 rather than 1 -> 4 at md, where four stat cards
+            would be squeezed into roughly 165px each. */}
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: "Appointments", value: stats.appointments, icon: CalendarDays },
+            { label: "Patients", value: stats.patients, icon: Users },
+            { label: "Pending", value: stats.pending, icon: ClipboardList },
+            { label: "Completed", value: stats.completed, icon: FileText },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <Card key={item.label} className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-500">{item.label}</p>
+                    <p className="mt-1 text-2xl font-semibold text-slate-900">{item.value}</p>
                   </div>
-                </Card>
-              );
-            })}
-          </section>
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+              </Card>
+            );
+          })}
+        </section>
 
-          <section className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-            <Card>
-              <h2 className="mb-3 text-base font-semibold text-slate-900">Upcoming Appointments</h2>
-              {loading ? (
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading…
-                </div>
-              ) : appointments.length === 0 ? (
-                <p className="text-sm text-slate-500">No appointments yet.</p>
-              ) : (
-                <div className="space-y-2">
-                  {appointments.map((appointment) => (
-                    <div key={appointment.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3">
-                      <div className="min-w-0">
-                        <p className="truncate font-semibold text-slate-900">{appointment.patientName}</p>
-                        <p className="truncate text-sm text-slate-500">{appointment.date} • {appointment.time}</p>
-                      </div>
-                      <Badge>{appointment.status}</Badge>
+        <section className="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
+          <Card>
+            <h2 className="mb-3 text-base font-semibold text-slate-900">Upcoming Appointments</h2>
+            {loading ? (
+              <div className="flex items-center gap-2 text-sm text-slate-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading…
+              </div>
+            ) : appointments.length === 0 ? (
+              <p className="text-sm text-slate-500">No appointments yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {appointments.map((appointment) => (
+                  <div key={appointment.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-slate-900">{appointment.patientName}</p>
+                      <p className="truncate text-sm text-slate-500">{appointment.date} • {appointment.time}</p>
                     </div>
-                  ))}
-                </div>
-              )}
-            </Card>
+                    <Badge>{appointment.status}</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
 
-            <Card>
-              <h2 className="mb-3 text-base font-semibold text-slate-900">Notifications</h2>
-              {notifications.length === 0 ? (
-                <p className="text-sm text-slate-500">No notifications.</p>
-              ) : (
-                <div className="space-y-2">
-                  {notifications.slice(0, 4).map((notification) => (
-                    <div key={notification.id} className="rounded-xl bg-slate-50 p-3">
-                      <p className="font-semibold text-slate-900">{notification.title}</p>
-                      <p className="mt-1 text-sm text-slate-500">{notification.message}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
-          </section>
-        </div>
-      </main>
+          <Card>
+            <h2 className="mb-3 text-base font-semibold text-slate-900">Notifications</h2>
+            {notifications.length === 0 ? (
+              <p className="text-sm text-slate-500">No notifications.</p>
+            ) : (
+              <div className="space-y-2">
+                {notifications.slice(0, 4).map((notification) => (
+                  <div key={notification.id} className="rounded-xl bg-slate-50 p-3">
+                    <p className="font-semibold text-slate-900">{notification.title}</p>
+                    <p className="mt-1 text-sm text-slate-500">{notification.message}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </section>
+      </PageContainer>
     </AuthGuard>
   );
 }

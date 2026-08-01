@@ -37,7 +37,7 @@ export default function BootstrapAdminPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-accent px-4 py-16">
+    <main className="flex min-h-screen items-center justify-center bg-accent px-4">
       <Card className="w-full max-w-md text-center">
         <div className="flex justify-center text-primary">
           <ShieldCheck className="h-12 w-12" />

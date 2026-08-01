@@ -45,7 +45,7 @@ export default function RegisterPage() {
           <Input label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
           <div className="relative">
             <Input label="Password" type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required />
-            <button type="button" className="absolute right-3 top-11 rounded-full p-2 text-slate-500 hover:bg-slate-100" onClick={() => setShowPassword((value) => !value)} aria-label="Toggle password visibility">
+            <button type="button" className="absolute right-2 top-7 inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100" onClick={() => setShowPassword((value) => !value)} aria-label="Toggle password visibility">
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>

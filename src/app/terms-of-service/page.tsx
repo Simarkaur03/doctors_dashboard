@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { BackLink } from "../../components/ui/BackLink";
+import { Card } from "../../components/ui/Card";
+import { PageContainer } from "../../components/ui/PageContainer";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -7,11 +9,10 @@ export const metadata: Metadata = {
 
 export default function TermsOfServicePage() {
   return (
-    <main className="min-h-screen bg-accent px-4 py-12">
-      <div className="mx-auto max-w-3xl space-y-3">
-        <BackLink href="/" label="Back to home" />
-      <div className="rounded-[32px] bg-white p-8 shadow-[0_20px_60px_-25px_rgba(77,105,78,0.2)] md:p-12">
-        <h1 className="text-3xl font-semibold text-slate-900">
+    <PageContainer width="narrow">
+      <BackLink href="/" label="Back to home" />
+      <Card className="p-6 md:p-8">
+        <h1 className="text-2xl font-semibold text-slate-900">
           Terms of Service
         </h1>
         <p className="mt-2 text-sm text-slate-500">
@@ -103,8 +104,7 @@ export default function TermsOfServicePage() {
             </p>
           </section>
         </div>
-      </div>
-      </div>
-    </main>
+      </Card>
+    </PageContainer>
   );
 }

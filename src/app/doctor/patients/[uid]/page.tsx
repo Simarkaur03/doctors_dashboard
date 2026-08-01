@@ -10,6 +10,7 @@ import { Card } from "../../../../components/ui/Card";
 import { Badge } from "../../../../components/ui/Badge";
 import { BackLink } from "../../../../components/ui/BackLink";
 import type { Appointment } from "../../../../lib/firestore-schema";
+import { PageContainer } from "../../../../components/ui/PageContainer";
 
 interface PatientProfile {
   name: string;
@@ -57,70 +58,68 @@ export default function DoctorPatientProfilePage() {
 
   return (
     <AuthGuard requiredRole="doctor">
-      <main className="bg-accent p-4 md:p-6">
-        <div className="mx-auto max-w-4xl space-y-4">
-          <BackLink href="/doctor/patients" label="Back to patients" />
+      <PageContainer>
+        <BackLink href="/doctor/patients" label="Back to patients" />
 
-          {loading ? (
+        {loading ? (
+          <Card>
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading…
+            </div>
+          </Card>
+        ) : notFound || !profile ? (
+          <Card>
+            <p className="text-sm text-slate-600">Patient not found.</p>
+          </Card>
+        ) : (
+          <>
             <Card>
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading…
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-primary">
+                  <UserIcon className="h-5 w-5" />
+                </div>
+                <h1 className="text-lg font-semibold text-slate-900">{profile.name}</h1>
+              </div>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <div className="flex min-w-0 items-center gap-2 text-sm text-slate-600">
+                  <Mail className="h-4 w-4 shrink-0 text-primary" /> <span className="truncate">{profile.email || "—"}</span>
+                </div>
+                <div className="flex min-w-0 items-center gap-2 text-sm text-slate-600">
+                  <Phone className="h-4 w-4 shrink-0 text-primary" /> <span className="truncate">{profile.phone || "—"}</span>
+                </div>
+                {profile.dateOfBirth ? (
+                  <div className="text-sm text-slate-600">DOB: {profile.dateOfBirth}</div>
+                ) : null}
               </div>
             </Card>
-          ) : notFound || !profile ? (
-            <Card>
-              <p className="text-sm text-slate-600">Patient not found.</p>
-            </Card>
-          ) : (
-            <>
-              <Card>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-primary">
-                    <UserIcon className="h-5 w-5" />
-                  </div>
-                  <h1 className="text-lg font-semibold text-slate-900">{profile.name}</h1>
-                </div>
-                <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                  <div className="flex min-w-0 items-center gap-2 text-sm text-slate-600">
-                    <Mail className="h-4 w-4 shrink-0 text-primary" /> <span className="truncate">{profile.email || "—"}</span>
-                  </div>
-                  <div className="flex min-w-0 items-center gap-2 text-sm text-slate-600">
-                    <Phone className="h-4 w-4 shrink-0 text-primary" /> <span className="truncate">{profile.phone || "—"}</span>
-                  </div>
-                  {profile.dateOfBirth ? (
-                    <div className="text-sm text-slate-600">DOB: {profile.dateOfBirth}</div>
-                  ) : null}
-                </div>
-              </Card>
 
-              <Card>
-                <h2 className="mb-3 text-base font-semibold text-slate-900">Appointments</h2>
-                {appointments.length === 0 ? (
-                  <p className="text-sm text-slate-500">No appointments yet.</p>
-                ) : (
-                  <div className="space-y-2">
-                    {appointments.map((appointment) => (
-                      <div
-                        key={appointment.id}
-                        className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3"
-                      >
-                        <div className="min-w-0">
-                          <p className="font-semibold text-slate-900">
-                            {appointment.date} • {appointment.time}
-                          </p>
-                          {appointment.reason ? <p className="break-words text-sm text-slate-500">{appointment.reason}</p> : null}
-                        </div>
-                        <Badge>{appointment.status}</Badge>
+            <Card>
+              <h2 className="mb-3 text-base font-semibold text-slate-900">Appointments</h2>
+              {appointments.length === 0 ? (
+                <p className="text-sm text-slate-500">No appointments yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {appointments.map((appointment) => (
+                    <div
+                      key={appointment.id}
+                      className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-900">
+                          {appointment.date} • {appointment.time}
+                        </p>
+                        {appointment.reason ? <p className="break-words text-sm text-slate-500">{appointment.reason}</p> : null}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </Card>
-            </>
-          )}
-        </div>
-      </main>
+                      <Badge>{appointment.status}</Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </>
+        )}
+      </PageContainer>
     </AuthGuard>
   );
 }

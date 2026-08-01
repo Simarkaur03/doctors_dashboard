@@ -11,6 +11,7 @@ import { Button } from "../../../components/ui/Button";
 import { fetchUserProfile, saveUserProfile } from "../../../lib/patient";
 import { toast } from "../../../lib/toast";
 import { toLocalDateString } from "../../../lib/date-utils";
+import { PageContainer } from "../../../components/ui/PageContainer";
 
 export default function PatientProfilePage() {
   const { user, logout } = useAuth();
@@ -69,57 +70,55 @@ export default function PatientProfilePage() {
 
   return (
     <AuthGuard requiredRole="patient">
-      <main className="bg-accent p-4 md:p-6">
-        <div className="mx-auto max-w-2xl">
-          <Card>
-            <h1 className="text-xl font-semibold text-slate-900">Profile</h1>
+      <PageContainer width="narrow">
+        <Card>
+          <h1 className="text-xl font-semibold text-slate-900">Profile</h1>
 
-            {loading ? (
-              <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading…
-              </div>
-            ) : (
-              <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
-                <Input label="Email" type="email" value={email} disabled readOnly />
-                <Input
-                  label="Full name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  error={errors.name}
-                  required
-                />
-                <Input
-                  label="Phone number"
-                  type="tel"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  error={errors.phone}
-                />
-                <Input
-                  label="Date of birth"
-                  type="date"
-                  value={dateOfBirth}
-                  onChange={(event) => setDateOfBirth(event.target.value)}
-                  max={toLocalDateString()}
-                />
-                <Button type="submit" className="w-full" disabled={saving}>
-                  {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  {saving ? "Saving" : "Save changes"}
-                </Button>
-              </form>
-            )}
-          </Card>
+          {loading ? (
+            <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading…
+            </div>
+          ) : (
+            <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+              <Input label="Email" type="email" value={email} disabled readOnly />
+              <Input
+                label="Full name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                error={errors.name}
+                required
+              />
+              <Input
+                label="Phone number"
+                type="tel"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
+                error={errors.phone}
+              />
+              <Input
+                label="Date of birth"
+                type="date"
+                value={dateOfBirth}
+                onChange={(event) => setDateOfBirth(event.target.value)}
+                max={toLocalDateString()}
+              />
+              <Button type="submit" className="w-full" disabled={saving}>
+                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {saving ? "Saving" : "Save changes"}
+              </Button>
+            </form>
+          )}
+        </Card>
 
-          <button
-            onClick={handleLogout}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-          >
-            <LogOut className="h-4 w-4" />
-            Sign out
-          </button>
-        </div>
-      </main>
+        <button
+          onClick={handleLogout}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+        >
+          <LogOut className="h-4 w-4" />
+          Sign out
+        </button>
+      </PageContainer>
     </AuthGuard>
   );
 }

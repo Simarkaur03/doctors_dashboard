@@ -66,7 +66,10 @@ export function DashboardShell({
           href={item.href}
           onClick={variant === "drawer" ? () => setDrawerOpen(false) : undefined}
           aria-current={active ? "page" : undefined}
-          className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+          // py-3 puts every nav row at 44px, the minimum comfortable touch
+          // target in the mobile drawer; the desktop sidebar shares it so the
+          // two never drift apart.
+          className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
             active
               ? "bg-primary text-white shadow-sm"
               : "text-slate-700 hover:bg-primary/10"
@@ -81,7 +84,7 @@ export function DashboardShell({
   const signOutButton = (
     <button
       onClick={onSignOut}
-      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 transition duration-150 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-slate-700 transition duration-150 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
     >
       <LogOut className="h-5 w-5 shrink-0" />
       <span>Sign out</span>
@@ -111,7 +114,7 @@ export function DashboardShell({
           aria-label="Open menu"
           aria-expanded={drawerOpen}
           aria-controls="mobile-nav-drawer"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition duration-150 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition duration-150 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -138,7 +141,7 @@ export function DashboardShell({
                 <button
                   onClick={() => setDrawerOpen(false)}
                   aria-label="Close menu"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-slate-600 transition duration-150 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-slate-600 transition duration-150 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 >
                   <X className="h-5 w-5" />
                 </button>
