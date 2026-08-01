@@ -123,7 +123,7 @@ export default function AdminLoginPage() {
               key={option}
               type="button"
               onClick={() => setStaffRole(option)}
-              className={`rounded-lg py-2 text-sm font-semibold capitalize transition ${
+              className={`min-h-11 rounded-lg py-2 text-sm font-semibold capitalize transition ${
                 staffRole === option ? "bg-white text-primary shadow-sm" : "text-slate-500"
               }`}
             >

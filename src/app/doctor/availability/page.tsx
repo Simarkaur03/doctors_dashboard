@@ -264,7 +264,7 @@ export default function DoctorAvailabilityPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleToggleBlock(slot)}
-                      className="rounded-xl border border-slate-200 p-2 text-slate-600 hover:bg-slate-100"
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100"
                       aria-label={slot.status === "unavailable" ? "Unblock slot" : "Block slot"}
                       title={slot.status === "unavailable" ? "Unblock slot" : "Block slot"}
                     >
@@ -272,7 +272,7 @@ export default function DoctorAvailabilityPage() {
                     </button>
                     <button
                       onClick={() => handleRemoveSlot(slot)}
-                      className="rounded-xl border border-red-200 p-2 text-red-600 hover:bg-red-50"
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-red-200 text-red-600 hover:bg-red-50"
                       aria-label="Remove slot"
                       title="Remove slot"
                     >

@@ -158,7 +158,7 @@ export default function MyAppointments() {
                   {canCancelAppointment(appointment.status) && (
                     <button
                       onClick={() => handleCancelClick(appointment)}
-                      className="rounded-lg border border-red-600 px-3 py-1.5 text-sm font-semibold text-red-600 transition duration-150 hover:bg-red-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:active:scale-100"
+                      className="inline-flex min-h-11 items-center justify-center rounded-lg border border-red-600 px-3 text-sm font-semibold text-red-600 transition duration-150 hover:bg-red-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:active:scale-100"
                       disabled={cancellingId === appointment.id}
                     >
                       {cancellingId === appointment.id ? "Cancelling…" : "Cancel"}

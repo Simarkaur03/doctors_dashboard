@@ -12,8 +12,9 @@ export function Button({ className, variant = "primary", size = "md", ...props }
     secondary: "bg-accent text-primary hover:bg-accent-hover hover:shadow-sm focus-visible:ring-primary",
     ghost: "bg-transparent text-primary hover:bg-slate-100 focus-visible:ring-primary",
   };
+  // Every size is at least 44px tall — the smallest comfortable touch target.
   const sizes = {
-    sm: "h-10 px-3 text-sm",
+    sm: "h-11 px-3 text-sm",
     md: "h-12 px-4 text-sm",
     lg: "h-14 px-6 text-base",
   };

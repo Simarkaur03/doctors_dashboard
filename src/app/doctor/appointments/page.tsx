@@ -72,7 +72,7 @@ export default function DoctorAppointmentsPage() {
               <button
                 key={option}
                 onClick={() => setFilter(option)}
-                className={`rounded-full px-3 py-1.5 text-sm font-semibold capitalize transition ${
+                className={`min-h-11 rounded-full px-4 text-sm font-semibold capitalize transition ${
                   filter === option ? "bg-primary text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
